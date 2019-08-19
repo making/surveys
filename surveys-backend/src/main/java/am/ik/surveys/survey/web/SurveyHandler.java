@@ -1,7 +1,5 @@
 package am.ik.surveys.survey.web;
 
-import am.ik.surveys.answer.AnswerDetailRepository;
-import am.ik.surveys.answer.AnswerRepository;
 import am.ik.surveys.question.QuestionRepository;
 import am.ik.surveys.questionchoice.QuestionChoiceRepository;
 import am.ik.surveys.survey.Survey;
@@ -23,10 +21,6 @@ import java.net.URI;
 @Component
 public class SurveyHandler {
 
-    private final AnswerDetailRepository answerDetailRepository;
-
-    private final AnswerRepository answerRepository;
-
     private final QuestionChoiceRepository questionChoiceRepository;
 
     private final QuestionRepository questionRepository;
@@ -38,15 +32,12 @@ public class SurveyHandler {
     private final ULID ulid;
 
     public SurveyHandler(ULID ulid, SurveyRepository surveyRepository, SurveyQuestionRepository surveyQuestionRepository, QuestionRepository questionRepository,
-                         QuestionChoiceRepository questionChoiceRepository, AnswerRepository answerRepository,
-                         AnswerDetailRepository answerDetailRepository) {
+                         QuestionChoiceRepository questionChoiceRepository) {
         this.ulid = ulid;
         this.surveyRepository = surveyRepository;
         this.surveyQuestionRepository = surveyQuestionRepository;
         this.questionRepository = questionRepository;
         this.questionChoiceRepository = questionChoiceRepository;
-        this.answerRepository = answerRepository;
-        this.answerDetailRepository = answerDetailRepository;
     }
 
     public RouterFunction<ServerResponse> routes() {
