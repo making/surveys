@@ -10,6 +10,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Repository
 public class QuestionRepository {
 
+    public Mono<Question> findById(Question.Id questionId) {
+        return Mono.justOrEmpty(this.questions.stream().filter(q -> Objects.equals(q.getQuestionId(), questionId)).findAny());
+    }
+
+
     public Mono<Question> insert(Mono<Question> questionMono) {
         return questionMono.map(question -> {
             this.questions.add(question);
