@@ -18,20 +18,20 @@ main =
 
 
 type alias Model =
-    { greeting : Greeting
+    { survey : Survey
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { greeting = { id = 0, content = "" } }
+    ( { survey = { surveyId = "", startDateTime = "", endDateTime = "" } }
     , Cmd.none
     )
 
 
 type Msg
     = Click
-    | GotGreeting (Result Http.Error Greeting)
+    | GotSurvey (Result Http.Error Survey)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -40,43 +40,49 @@ update msg model =
         Click ->
             ( model
             , Http.get
-                { url = "/greeting"
-                , expect = Http.expectJson GotGreeting greetingDecoder
+                { url = "/surveys/01DJ9KW69W1059TF3WE5GJTEDM"
+                , expect = Http.expectJson GotSurvey surveyDecoder
                 }
             )
 
-        GotGreeting (Ok greeting) ->
-            ( { model | greeting = greeting }, Cmd.none )
+        GotSurvey (Ok survey) ->
+            ( { model | survey = survey }, Cmd.none )
 
-        GotGreeting (Err error) ->
-            ( { model | greeting = { id = -1, content = Debug.toString error } }, Cmd.none )
+        GotSurvey (Err error) ->
+            ( { model | survey = { surveyId = Debug.toString error, startDateTime = "", endDateTime = "" } }, Cmd.none )
 
 
 view : Model -> Html Msg
 view model =
     div []
-        [ button [ onClick Click ] [ text "Greet" ]
+        [ button [ onClick Click ] [ text "Get" ]
         , table []
             [ tr []
-                [ th [] [ text "ID" ]
-                , td [] [ text (String.fromInt model.greeting.id) ]
+                [ th [] [ text "Survey ID" ]
+                , td [] [ text model.survey.surveyId ]
                 ]
             , tr []
-                [ th [] [ text "Content" ]
-                , td [] [ text model.greeting.content ]
+                [ th [] [ text "Start Date Time" ]
+                , td [] [ text model.survey.startDateTime ]
+                ]
+            , tr []
+                [ th [] [ text "End Date Time" ]
+                , td [] [ text model.survey.endDateTime ]
                 ]
             ]
         ]
 
 
-type alias Greeting =
-    { id : Int
-    , content : String
+type alias Survey =
+    { surveyId : String
+    , startDateTime : String
+    , endDateTime : String
     }
 
 
-greetingDecoder : Decoder Greeting
-greetingDecoder =
-    Json.Decode.map2 Greeting
-        (Json.Decode.field "id" Json.Decode.int)
-        (Json.Decode.field "content" Json.Decode.string)
+surveyDecoder : Decoder Survey
+surveyDecoder =
+    Json.Decode.map3 Survey
+        (Json.Decode.field "surveyId" Json.Decode.string)
+        (Json.Decode.field "startDateTime" Json.Decode.string)
+        (Json.Decode.field "endDateTime" Json.Decode.string)
