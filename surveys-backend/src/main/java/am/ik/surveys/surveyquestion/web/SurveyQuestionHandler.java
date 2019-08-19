@@ -18,13 +18,13 @@ import reactor.core.publisher.Mono;
 @Component
 public class SurveyQuestionHandler {
 
-    private final SurveyRepository surveyRepository;
-
-    private final SurveyQuestionRepository surveyQuestionRepository;
+    private final QuestionChoiceRepository questionChoiceRepository;
 
     private final QuestionRepository questionRepository;
 
-    private final QuestionChoiceRepository questionChoiceRepository;
+    private final SurveyQuestionRepository surveyQuestionRepository;
+
+    private final SurveyRepository surveyRepository;
 
     public SurveyQuestionHandler(SurveyRepository surveyRepository, SurveyQuestionRepository surveyQuestionRepository, QuestionRepository questionRepository,
                                  QuestionChoiceRepository questionChoiceRepository) {
@@ -36,14 +36,25 @@ public class SurveyQuestionHandler {
 
     public RouterFunction<ServerResponse> routes() {
         return RouterFunctions.route()
-            .GET("/surveys/{surveyId}/survey_questions", this::getSurveyQuestionsBySurveyId)
-            .POST("/surveys/{surveyId}/survey_questions/{questionId}", this::postSurveyQuestion)
-            .DELETE("/surveys/{surveyId}/survey_questions/{questionId}", this::deleteSurveyQuestion)
+            .GET("/surveys/{survey_id}/survey_questions", this::getSurveyQuestionsBySurveyId)
+            .POST("/surveys/{survey_id}/survey_questions/{question_id}", this::postSurveyQuestion)
+            .DELETE("/surveys/{survey_id}/survey_questions/{question_id}", this::deleteSurveyQuestion)
             .build();
     }
 
+    Mono<ServerResponse> deleteSurveyQuestion(ServerRequest req) {
+        final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("survey_id"));
+        final Question.Id questionId = Question.Id.valueOf(req.pathVariable("question_id"));
+        final SurveyQuestion surveyQuestion = new SurveyQuestion.Builder()
+            .withSurveyId(surveyId)
+            .withQuestionId(questionId)
+            .build();
+        return this.surveyQuestionRepository.delete(surveyQuestion)
+            .then(ServerResponse.noContent().build());
+    }
+
     Mono<ServerResponse> getSurveyQuestionsBySurveyId(ServerRequest req) {
-        final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("surveyId"));
+        final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("survey_id"));
         final Flux<SurveyQuestion> surveyQuestionFlux = this.surveyQuestionRepository.findBySurveyId(surveyId);
         final Flux<SurveyQuestionResponse> surveyQuestionResponseFlux = surveyQuestionFlux.flatMap(surveyQuestion -> SurveyQuestionResponse.from(surveyQuestion, this.questionRepository,
             this.questionChoiceRepository));
@@ -51,8 +62,8 @@ public class SurveyQuestionHandler {
     }
 
     Mono<ServerResponse> postSurveyQuestion(ServerRequest req) {
-        final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("surveyId"));
-        final Question.Id questionId = Question.Id.valueOf(req.pathVariable("questionId"));
+        final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("survey_id"));
+        final Question.Id questionId = Question.Id.valueOf(req.pathVariable("question_id"));
         final Mono<Survey> surveyMono = this.surveyRepository.findById(surveyId);
         final Mono<Question> questionMono = this.questionRepository.findById(questionId);
         final Mono<SurveyQuestionRequest> surveyQuestionRequestMono = req.bodyToMono(SurveyQuestionRequest.class);
@@ -65,16 +76,5 @@ public class SurveyQuestionHandler {
         final Mono<SurveyQuestion> insert = this.surveyQuestionRepository.insert(surveyQuestionMono);
         return insert.flatMap(__ -> ServerResponse.ok().build())
             .switchIfEmpty(Mono.defer(() -> ServerResponse.notFound().build()));
-    }
-
-    Mono<ServerResponse> deleteSurveyQuestion(ServerRequest req) {
-        final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("surveyId"));
-        final Question.Id questionId = Question.Id.valueOf(req.pathVariable("questionId"));
-        final SurveyQuestion surveyQuestion = new SurveyQuestion.Builder()
-            .withSurveyId(surveyId)
-            .withQuestionId(questionId)
-            .build();
-        return this.surveyQuestionRepository.delete(surveyQuestion)
-            .then(ServerResponse.noContent().build());
     }
 }

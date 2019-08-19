@@ -7,23 +7,23 @@ https://scrapbox.io/kawasima/%E3%82%A2%E3%83%B3%E3%82%B1%E3%83%BC%E3%83%88
 
 ```
 # Create a survey
-surveyId=$(curl -XPOST http://localhost:8080/surveys -H 'Content-Type: application/json' -d '{}' | jq -r .surveyId)
+survey_id=$(curl -XPOST http://localhost:8080/surveys -H 'Content-Type: application/json' -d '{}' | jq -r .survey_id)
 
 # Create a question
-questionId=$(curl -XPOST http://localhost:8080/questions -H 'Content-Type: application/json' -d '{"questionText": "How are you?", "maxChoices": 1}' | jq -r .questionId)
+question_id=$(curl -XPOST http://localhost:8080/questions -H 'Content-Type: application/json' -d '{"question_text": "How are you?", "maxChoices": 1}' | jq -r .question_id)
 
 # Map a question to a survey
-curl -XPOST http://localhost:8080/surveys/${surveyId}/survey_questions/${questionId} -H 'Content-Type: application/json' -d '{"required": true}'
+curl -XPOST http://localhost:8080/surveys/${survey_id}/survey_questions/${question_id} -H 'Content-Type: application/json' -d '{"required": true}'
 
 # Create question choices
-questionChoiceId1=$(curl -XPOST http://localhost:8080/questions/${questionId}/question_choices -H 'Content-Type: application/json' -d '{"question_choiceText": "Excellent", "allowFreeText": false}' | jq -r .questionChoiceId)
-questionChoiceId2=$(curl -XPOST http://localhost:8080/questions/${questionId}/question_choices -H 'Content-Type: application/json' -d '{"question_choiceText": "Good", "allowFreeText": false}' | jq -r .questionChoiceId)
-questionChoiceId3=$(curl -XPOST http://localhost:8080/questions/${questionId}/question_choices -H 'Content-Type: application/json' -d '{"question_choiceText": "Okay", "allowFreeText": false}' | jq -r .questionChoiceId)
-questionChoiceId4=$(curl -XPOST http://localhost:8080/questions/${questionId}/question_choices -H 'Content-Type: application/json' -d '{"question_choiceText": "Other", "allowFreeText": true}' | jq -r .questionChoiceId)
+question_choice_id1=$(curl -XPOST http://localhost:8080/questions/${question_id}/question_choices -H 'Content-Type: application/json' -d '{"question_choice_text": "Excellent", "allow_free_text": false}' | jq -r .question_choice_id)
+question_choice_id2=$(curl -XPOST http://localhost:8080/questions/${question_id}/question_choices -H 'Content-Type: application/json' -d '{"question_choice_text": "Good", "allow_free_text": false}' | jq -r .question_choice_id)
+question_choice_id3=$(curl -XPOST http://localhost:8080/questions/${question_id}/question_choices -H 'Content-Type: application/json' -d '{"question_choice_text": "Okay", "allow_free_text": false}' | jq -r .question_choice_id)
+question_choice_id4=$(curl -XPOST http://localhost:8080/questions/${question_id}/question_choices -H 'Content-Type: application/json' -d '{"question_choice_text": "Other", "allow_free_text": true}' | jq -r .question_choice_id)
 
 # Create answers
-curl -XPOST http://localhost:8080/surveys/${surveyId}/answers -H 'Content-Type: application/json' -d "{\"questionId\": \"${questionId}\", \"respondentId\": \"demo1\", \"details\": [{\"questionChoiceId\": \"${questionChoiceId1}\"}]}"
-curl -XPOST http://localhost:8080/surveys/${surveyId}/answers -H 'Content-Type: application/json' -d "{\"questionId\": \"${questionId}\", \"respondentId\": \"demo2\", \"details\": [{\"questionChoiceId\": \"${questionChoiceId2}\"}]}"
-curl -XPOST http://localhost:8080/surveys/${surveyId}/answers -H 'Content-Type: application/json' -d "{\"questionId\": \"${questionId}\", \"respondentId\": \"demo3\", \"details\": [{\"questionChoiceId\": \"${questionChoiceId3}\"}]}"
-curl -XPOST http://localhost:8080/surveys/${surveyId}/answers -H 'Content-Type: application/json' -d "{\"questionId\": \"${questionId}\", \"respondentId\": \"demo4\", \"details\": [{\"questionChoiceId\": \"${questionChoiceId4}\", \"answerText\": \"Not Bad\"}]}"
+curl -XPOST http://localhost:8080/surveys/${survey_id}/answers -H 'Content-Type: application/json' -d "{\"question_id\": \"${question_id}\", \"respondent_id\": \"demo1\", \"details\": [{\"question_choice_id\": \"${question_choice_id1}\"}]}"
+curl -XPOST http://localhost:8080/surveys/${survey_id}/answers -H 'Content-Type: application/json' -d "{\"question_id\": \"${question_id}\", \"respondent_id\": \"demo2\", \"details\": [{\"question_choice_id\": \"${question_choice_id2}\"}]}"
+curl -XPOST http://localhost:8080/surveys/${survey_id}/answers -H 'Content-Type: application/json' -d "{\"question_id\": \"${question_id}\", \"respondent_id\": \"demo3\", \"details\": [{\"question_choice_id\": \"${question_choice_id3}\"}]}"
+curl -XPOST http://localhost:8080/surveys/${survey_id}/answers -H 'Content-Type: application/json' -d "{\"question_id\": \"${question_id}\", \"respondent_id\": \"demo4\", \"details\": [{\"question_choice_id\": \"${question_choice_id4}\", \"answer_text\": \"Not Bad\"}]}"
 ```

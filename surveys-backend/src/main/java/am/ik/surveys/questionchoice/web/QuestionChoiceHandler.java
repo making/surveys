@@ -20,13 +20,13 @@ public class QuestionChoiceHandler {
 
     public RouterFunction<ServerResponse> routes() {
         return RouterFunctions.route()
-            .GET("/question_choices/{questionChoiceId}", this::getQuestionChoice)
-            .DELETE("/question_choices/{questionChoiceId}", this::deleteQuestionChoice)
+            .GET("/question_choices/{question_choice_id}", this::getQuestionChoice)
+            .DELETE("/question_choices/{question_choice_id}", this::deleteQuestionChoice)
             .build();
     }
 
     Mono<ServerResponse> getQuestionChoice(ServerRequest req) {
-        final QuestionChoice.Id questionChoiceId = QuestionChoice.Id.valueOf(req.pathVariable("questionChoiceId"));
+        final QuestionChoice.Id questionChoiceId = QuestionChoice.Id.valueOf(req.pathVariable("question_choice_id"));
         final Mono<QuestionChoice> questionChoiceMono = this.questionChoiceRepository.findById(questionChoiceId);
         return questionChoiceMono
             .flatMap(questionChoice -> ServerResponse.ok().body(questionChoice))
@@ -34,7 +34,7 @@ public class QuestionChoiceHandler {
     }
 
     Mono<ServerResponse> deleteQuestionChoice(ServerRequest req) {
-        final QuestionChoice.Id questionChoiceId = QuestionChoice.Id.valueOf(req.pathVariable("questionChoiceId"));
+        final QuestionChoice.Id questionChoiceId = QuestionChoice.Id.valueOf(req.pathVariable("question_choice_id"));
         final Mono<Void> questionChoiceMono = this.questionChoiceRepository.deleteById(questionChoiceId);
         return questionChoiceMono.then(ServerResponse.noContent().build());
     }

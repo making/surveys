@@ -33,22 +33,22 @@ public class AnswerHandler {
 
     public RouterFunction<ServerResponse> routes() {
         return RouterFunctions.route()
-            .GET("/surveys/{surveyId}/answers", this::getAnswersBySurveyId)
-            .POST("/surveys/{surveyId}/answers", this::postAnswers)
-            .GET("/answers/{answerId}", this::getAnswer)
-            .DELETE("/answers/{answerId}", this::deleteAnswer)
+            .GET("/surveys/{survey_id}/answers", this::getAnswersBySurveyId)
+            .POST("/surveys/{survey_id}/answers", this::postAnswers)
+            .GET("/answers/{answer_id}", this::getAnswer)
+            .DELETE("/answers/{answer_id}", this::deleteAnswer)
             .build();
     }
 
     Mono<ServerResponse> getAnswersBySurveyId(ServerRequest req) {
-        final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("surveyId"));
+        final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("survey_id"));
         final Flux<Answer> answerFlux = this.answerRepository.findAllBySurveyId(surveyId);
         final Flux<AnswerResponse> answerResponseFlux = answerFlux.flatMap(answer -> AnswerResponse.from(answer, answerDetailRepository));
         return ServerResponse.ok().body(answerResponseFlux, AnswerResponse.class);
     }
 
     Mono<ServerResponse> postAnswers(ServerRequest req) {
-        final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("surveyId"));
+        final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("survey_id"));
         final Answer.Id answerId = Answer.Id.nextValue(this.ulid);
         final Mono<AnswerResponse> answerResponseMono = req.bodyToMono(AnswerRequest.class)
             .map(answerRequest -> Tuples.of(answerRequest.toAnswer(answerId, surveyId),
@@ -57,19 +57,19 @@ public class AnswerHandler {
             .flatMap(tpl -> this.answerRepository.insert(tpl.getT1())
                 .flatMap(answer -> this.answerDetailRepository.insert(tpl.getT2())
                     .map(details -> new AnswerResponse(answer, details))));
-        final URI location = req.uriBuilder().replacePath("answers/{answerId}").build(answerId);
+        final URI location = req.uriBuilder().replacePath("answers/{answer_id}").build(answerId);
         return ServerResponse.created(location).body(answerResponseMono, AnswerResponse.class);
     }
 
     Mono<ServerResponse> getAnswer(ServerRequest req) {
-        final Answer.Id answerId = Answer.Id.valueOf(req.pathVariable("answerId"));
+        final Answer.Id answerId = Answer.Id.valueOf(req.pathVariable("answer_id"));
         final Mono<Answer> answerMono = this.answerRepository.findById(answerId);
         final Mono<AnswerResponse> answerResponseMono = answerMono.flatMap(answer -> AnswerResponse.from(answer, answerDetailRepository));
         return ServerResponse.ok().body(answerResponseMono, AnswerResponse.class);
     }
 
     Mono<ServerResponse> deleteAnswer(ServerRequest req) {
-        final Answer.Id answerId = Answer.Id.valueOf(req.pathVariable("answerId"));
+        final Answer.Id answerId = Answer.Id.valueOf(req.pathVariable("answer_id"));
         final Mono<Void> deleteAnswer = this.answerRepository.deleteById(answerId);
         final Flux<Void> deleteDetails = this.answerDetailRepository.findAllByAnswerId(answerId)
             .flatMap(this.answerDetailRepository::delete);
