@@ -2,6 +2,7 @@ package am.ik.surveys.surveyquestion;
 
 import am.ik.surveys.question.Question;
 import am.ik.surveys.survey.Survey;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
@@ -36,6 +37,7 @@ public class SurveyQuestion {
         return this.surveyQuestionId.surveyId;
     }
 
+    @JsonIgnore // Remove duplicated field
     public Question.Id getQuestionId() {
         return this.surveyQuestionId.questionId;
     }

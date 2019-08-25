@@ -1,0 +1,109 @@
+= アンケートAPIドキュメント
+Toshiaki Maki(@making);
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectlinks:
+
+== API仕様
+
+このドキュメントページの他に次のフォーマットでもドキュメントを利用可能です。
+
+* link:openapi-3.0.yml[Download as OpenAPI 3.0 YAML]
+* link:swagger-ui.html[Swagger UI]
+
+[[resources]]
+== リソース
+
+このドキュメント上は読みやすさ向上のため、JSONを整形していますが、実際のレスポンスは整形されません。
+
+=== アンケート
+
+==== アンケート一件作成
+
+operation::post-surveys[]
+
+==== アンケート一覧取得
+
+operation::get-surveys[]
+
+==== アンケート一件取得
+
+operation::get-survey[]
+
+
+==== アンケート一件削除
+
+operation::delete-survey[]
+
+=== 設問
+
+==== 記述式回答設問一件作成
+
+operation::post-questions[]
+
+==== 選択回答設問一件作成
+
+operation::post-selective-questions[]
+
+==== 設問選択肢追加
+
+operation::post-question-question-choices[]
+
+==== 設問一件取得
+
+operation::get-question[]
+
+==== 設問選択肢取得
+
+operation::get-question-question-choices[]
+
+=== 設問選択肢
+
+==== 設問選択肢一件取得
+
+operation::get-question-choice[]
+
+==== 設問選択肢一件削除
+
+operation::delete-question-choice[]
+
+=== アンケート設問
+
+==== アンケート設問一件作成
+
+operation::post-survey-questions[]
+
+==== アンケート設問一件削除
+
+operation::delete-survey-question[]
+
+=== 回答
+
+==== アンケート回答一覧取得
+
+operation::get-answers-by-survey-id[]
+
+==== 記述式回答回答一件作成
+
+operation::post-descriptive-answers[]
+
+==== 選択回答回答一件作成
+
+operation::post-selective-answers[]
+
+==== 記述式回答回答一件取得
+
+operation::get-descriptive-answer[]
+
+==== 選択回答回答一件取得
+
+operation::get-selective-answer[]
+
+==== 回答一件削除
+
+operation::delete-answer[]
+
+
