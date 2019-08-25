@@ -3,8 +3,11 @@ package am.ik.surveys.answer.web;
 import am.ik.surveys.Fixtures;
 import am.ik.surveys.TestUtils;
 import am.ik.surveys.answer.Answer;
+import am.ik.surveys.answer.AnswerDetail;
 import am.ik.surveys.answer.AnswerDetailRepository;
 import am.ik.surveys.answer.AnswerRepository;
+import am.ik.surveys.answer.ChosenAnswer;
+import am.ik.surveys.answer.DescriptiveAnswer;
 import am.ik.surveys.question.Question;
 import am.ik.surveys.questionchoice.QuestionChoice;
 import am.ik.surveys.survey.Survey;
@@ -18,6 +21,9 @@ import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.List;
 import java.util.Map;
@@ -43,10 +49,14 @@ class AnswerHandlerTest {
 
     private WebTestClient testClient;
 
+    private AnswerRepository answerRepository;
+
+    private AnswerDetailRepository answerDetailRepository;
+
     @BeforeEach
     void setUp(RestDocumentationContextProvider restDocumentation) {
-        final AnswerRepository answerRepository = new AnswerRepository();
-        final AnswerDetailRepository answerDetailRepository = new AnswerDetailRepository();
+        this.answerRepository = new AnswerRepository();
+        this.answerDetailRepository = new AnswerDetailRepository();
         final AnswerHandler answerHandler = new AnswerHandler(this.ulid, answerRepository, answerDetailRepository);
         this.testClient = TestUtils.webTestClient(answerHandler.routes(), restDocumentation)
             .build();
@@ -111,6 +121,25 @@ class AnswerHandlerTest {
                 assertThat(details).hasSize(1);
                 assertThat(details.get(0).get("answer_id").asText()).isEqualTo(answerId);
                 assertThat(details.get(0).get("answer_text").asText()).isEqualTo("とても良い");
+                final Mono<Answer> answerMono = this.answerRepository.findById(Answer.Id.valueOf(answerId));
+                StepVerifier.create(answerMono)
+                    .consumeNextWith(answer -> {
+                        assertThat(answer.getAnswerId().toString()).isEqualTo(answerId);
+                        assertThat(answer.getSurveyId()).isEqualTo(survey.getSurveyId());
+                        assertThat(answer.getQuestionId()).isEqualTo(question.getQuestionId());
+                        assertThat(answer.getRespondentId().toString()).isEqualTo("xyz");
+                    })
+                    .expectComplete()
+                    .verify();
+                final Flux<AnswerDetail<?>> answerDetailFlux = this.answerDetailRepository.findAllByAnswerId(Answer.Id.valueOf(answerId));
+                StepVerifier.create(answerDetailFlux)
+                    .consumeNextWith(answerDetail -> {
+                        assertThat(answerDetail.getAnswerId().toString()).isEqualTo(answerId);
+                        assertThat(answerDetail).isInstanceOf(DescriptiveAnswer.class);
+                        assertThat(((DescriptiveAnswer) answerDetail).getAnswerText()).isEqualTo("とても良い");
+                    })
+                    .expectComplete()
+                    .verify();
             })
             .consumeWith(
                 document("post-descriptive-answers",
@@ -165,6 +194,25 @@ class AnswerHandlerTest {
                 assertThat(details).hasSize(1);
                 assertThat(details.get(0).get("answer_id").asText()).isEqualTo(answerId);
                 assertThat(details.get(0).get("question_choice_id").asText()).isEqualTo(questionChoice.getQuestionChoiceId().toString());
+                final Mono<Answer> answerMono = this.answerRepository.findById(Answer.Id.valueOf(answerId));
+                StepVerifier.create(answerMono)
+                    .consumeNextWith(answer -> {
+                        assertThat(answer.getAnswerId().toString()).isEqualTo(answerId);
+                        assertThat(answer.getSurveyId()).isEqualTo(survey.getSurveyId());
+                        assertThat(answer.getQuestionId()).isEqualTo(question.getQuestionId());
+                        assertThat(answer.getRespondentId().toString()).isEqualTo("xyz");
+                    })
+                    .expectComplete()
+                    .verify();
+                final Flux<AnswerDetail<?>> answerDetailFlux = this.answerDetailRepository.findAllByAnswerId(Answer.Id.valueOf(answerId));
+                StepVerifier.create(answerDetailFlux)
+                    .consumeNextWith(answerDetail -> {
+                        assertThat(answerDetail.getAnswerId().toString()).isEqualTo(answerId);
+                        assertThat(answerDetail).isInstanceOf(ChosenAnswer.class);
+                        assertThat(((ChosenAnswer) answerDetail).getquestionChoiceId()).isEqualTo(questionChoice.getQuestionChoiceId());
+                    })
+                    .expectComplete()
+                    .verify();
             })
             .consumeWith(
                 document("post-selective-answers",
