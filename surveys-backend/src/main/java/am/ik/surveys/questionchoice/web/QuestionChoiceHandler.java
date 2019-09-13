@@ -29,7 +29,7 @@ public class QuestionChoiceHandler {
         final QuestionChoice.Id questionChoiceId = QuestionChoice.Id.valueOf(req.pathVariable("question_choice_id"));
         final Mono<QuestionChoice> questionChoiceMono = this.questionChoiceRepository.findById(questionChoiceId);
         return questionChoiceMono
-            .flatMap(questionChoice -> ServerResponse.ok().body(questionChoice))
+            .flatMap(questionChoice -> ServerResponse.ok().bodyValue(questionChoice))
             .switchIfEmpty(Mono.defer(() -> ServerResponse.notFound().build()));
     }
 

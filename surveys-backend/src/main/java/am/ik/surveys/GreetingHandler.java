@@ -24,7 +24,7 @@ public class GreetingHandler {
 
     public Mono<ServerResponse> greeting(ServerRequest req) {
         final String name = req.queryParam("name").orElse("World");
-        return ServerResponse.ok().syncBody(new Greeting(counter.incrementAndGet(),
+        return ServerResponse.ok().bodyValue(new Greeting(counter.incrementAndGet(),
             String.format(template, name)));
     }
 }

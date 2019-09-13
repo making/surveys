@@ -131,7 +131,7 @@ class SurveyQuestionHandlerTest {
         this.testClient.post()
             .uri("/surveys/{survey_id}/survey_questions/{question_id}", survey.getSurveyId(), questionId)
             .contentType(MediaType.APPLICATION_JSON)
-            .syncBody(requestBody)
+            .bodyValue(requestBody)
             .exchange()
             .expectStatus().isOk()
             .expectBody(JsonNode.class)
