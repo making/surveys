@@ -36,6 +36,10 @@
             <artifactId>r2dbc-postgresql</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.r2dbc</groupId>
+            <artifactId>r2dbc-pool</artifactId>
+        </dependency>
+        <dependency>
             <groupId>am.ik.surveys</groupId>
             <artifactId>surveys-frontend</artifactId>
         </dependency>
