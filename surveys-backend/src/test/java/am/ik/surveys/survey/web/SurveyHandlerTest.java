@@ -80,6 +80,10 @@ class SurveyHandlerTest {
             StepVerifier.create(this.questionRepository.insert(Mono.just(question)))
                 .expectNext(question)
                 .verifyComplete());
+        Fixtures.questionChoices.forEach(questionChoice ->
+            StepVerifier.create(questionChoiceRepository.insert(Mono.just(questionChoice)))
+                .expectNext(questionChoice)
+                .verifyComplete());
         Fixtures.surveyQuestions.forEach(surveyQuestion ->
             StepVerifier.create(this.surveyQuestionRepository.insert(surveyQuestion))
                 .expectNext(surveyQuestion)
