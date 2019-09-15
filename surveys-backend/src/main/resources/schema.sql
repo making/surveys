@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS survey
 (
     survey_id       CHAR(26) PRIMARY KEY,
+    survey_title    VARCHAR(255)             NOT NULL,
     start_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
     end_date_time   TIMESTAMP WITH TIME ZONE NOT NULL
 );

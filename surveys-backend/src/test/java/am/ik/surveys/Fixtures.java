@@ -23,6 +23,7 @@ public class Fixtures {
     public static final List<Survey> surveys = List.of(
         new Survey.Builder()
             .withSurveyId(Survey.Id.valueOf("01DJ9KW69W1059TF3WE5GJTEDM"))
+            .withSurveyTitle("テストアンケート")
             .withStartDateTime(OffsetDateTime.parse("2019-08-01T00:00:00+09:00"))
             .withEndDateTime(OffsetDateTime.parse("2019-08-31T00:00:00+09:00"))
             .build()

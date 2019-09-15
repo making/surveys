@@ -21,6 +21,11 @@ public class Survey {
     private final Survey.Id surveyId;
 
     /**
+     * アンケートタイトル
+     */
+    private final String surveyTitle;
+
+    /**
      * 開始予定日時
      */
     private final OffsetDateTime startDateTime;
@@ -30,10 +35,15 @@ public class Survey {
      */
     private final OffsetDateTime endDateTime;
 
-    public Survey(Id surveyId, OffsetDateTime startDateTime, OffsetDateTime endDateTime) {
+    public Survey(Id surveyId, String surveyTitle, OffsetDateTime startDateTime, OffsetDateTime endDateTime) {
         this.surveyId = Objects.requireNonNull(surveyId);
+        this.surveyTitle = surveyTitle;
         this.startDateTime = Objects.requireNonNull(startDateTime);
         this.endDateTime = Objects.requireNonNull(endDateTime);
+    }
+
+    public String getSurveyTitle() {
+        return surveyTitle;
     }
 
     public Id getSurveyId() {
@@ -117,10 +127,12 @@ public class Survey {
 
         private OffsetDateTime startDateTime;
 
+        private String surveyTitle;
+
         private Id surveyId;
 
         public Survey build() {
-            return new Survey(surveyId, startDateTime, endDateTime);
+            return new Survey(surveyId, surveyTitle, startDateTime, endDateTime);
         }
 
         public Builder withEndDateTime(OffsetDateTime endDateTime) {
@@ -130,6 +142,11 @@ public class Survey {
 
         public Builder withStartDateTime(OffsetDateTime startDateTime) {
             this.startDateTime = startDateTime;
+            return this;
+        }
+
+        public Builder withSurveyTitle(String surveyTitle) {
+            this.surveyTitle = surveyTitle;
             return this;
         }
 

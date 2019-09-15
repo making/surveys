@@ -23,7 +23,7 @@ Toshiaki Maki(@making);
 API_URL=https://surveys.cfapps.io
 
 # アンケート作成
-survey1_id=$(curl -s -XPOST ${API_URL}/surveys -H 'Content-Type: application/json' -d '{"start_date_time":"2019-10-01T00:00:00.000+09:00", "end_date_time":"2020-10-01T00:00:00.000+09:00"}' | jq -r .survey_id)
+survey1_id=$(curl -s -XPOST ${API_URL}/surveys -H 'Content-Type: application/json' -d '{"survey_title":"テストアンケート", "start_date_time":"2019-10-01T00:00:00.000+09:00", "end_date_time":"2020-10-01T00:00:00.000+09:00"}' | jq -r .survey_id)
 
 # 選択回答設問作成
 question1_id=$(curl -s -XPOST ${API_URL}/questions -H 'Content-Type: application/json' -d '{"question_text": "この設計はいけてますか?", "max_choices": 1}' | jq -r .question_id)

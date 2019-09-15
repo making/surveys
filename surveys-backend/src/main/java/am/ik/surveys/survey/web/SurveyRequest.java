@@ -9,9 +9,15 @@ import java.time.ZoneOffset;
 
 public class SurveyRequest {
 
+    private String surveyTitle = "";
+
     private OffsetDateTime startDateTime = Instant.ofEpochSecond(0).atOffset(ZoneOffset.UTC);
 
     private OffsetDateTime endDateTime = LocalDate.of(3000, 1, 1).atStartOfDay().atOffset(ZoneOffset.UTC);
+
+    public String getSurveyTitle() {
+        return surveyTitle;
+    }
 
     public OffsetDateTime getStartDateTime() {
         return startDateTime;
@@ -32,6 +38,7 @@ public class SurveyRequest {
     public Survey toSurvey(Survey.Id surveyId) {
         return new Survey.Builder()
             .withSurveyId(surveyId)
+            .withSurveyTitle(this.surveyTitle)
             .withStartDateTime(this.startDateTime)
             .withEndDateTime(this.endDateTime)
             .build();

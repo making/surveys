@@ -33,6 +33,7 @@ class App extends Component {
         const surveys = this.state.surveys.map(survey =>
             <tr key={survey.survey_id}>
                 <td>{survey.survey_id}</td>
+                <td>{survey.survey_title}</td>
                 <td>{survey.start_date_time}</td>
                 <td>{survey.start_date_time}</td>
                 <td>
@@ -47,6 +48,7 @@ class App extends Component {
                     <tbody>
                     <tr>
                         <th>Survey ID</th>
+                        <th>Survey Title</th>
                         <th>Start Date Time</th>
                         <th>End Date Time</th>
                         <th>Delete</th>

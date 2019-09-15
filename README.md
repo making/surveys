@@ -7,7 +7,7 @@
 
 ```
 # Create a survey
-survey_id=$(curl -s -XPOST http://localhost:8080/surveys -H 'Content-Type: application/json' -d '{"start_date_time":"2019-10-01T00:00:00.000+09:00", "end_date_time":"2019-10-05T00:00:00.000+09:00"}' | jq -r .survey_id)
+survey_id=$(curl -s -XPOST http://localhost:8080/surveys -H 'Content-Type: application/json' -d '{"survey_title":"Demo Survey","start_date_time":"2019-10-01T00:00:00.000+09:00", "end_date_time":"2019-10-05T00:00:00.000+09:00"}' | jq -r .survey_id)
 
 # Create a question
 question_id=$(curl -s -XPOST http://localhost:8080/questions -H 'Content-Type: application/json' -d '{"question_text": "How are you?", "max_choices": 1}' | jq -r .question_id)

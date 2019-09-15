@@ -124,6 +124,7 @@ class SurveyHandlerTest {
                 final JsonNode res = result.getResponseBody();
                 assertThat(res).isNotNull();
                 assertThat(res.get("survey_id").asText()).isEqualTo(survey.getSurveyId().toString());
+                assertThat(res.get("survey_title").asText()).isEqualTo(survey.getSurveyTitle());
                 assertThat(OffsetDateTime.parse(res.get("start_date_time").asText())).isEqualTo(survey.getStartDateTime());
                 assertThat(OffsetDateTime.parse(res.get("end_date_time").asText())).isEqualTo(survey.getEndDateTime());
                 final JsonNode surveyQuestions = res.get("survey_questions");
@@ -135,6 +136,7 @@ class SurveyHandlerTest {
                     responseHeaders(headerWithName(CONTENT_TYPE).description(APPLICATION_JSON_VALUE)),
                     responseFields(
                         fieldWithPath("survey_id").type(JsonFieldType.STRING).description("アンケートID"),
+                        fieldWithPath("survey_title").type(JsonFieldType.STRING).description("アンケートタイトル"),
                         fieldWithPath("start_date_time").type(JsonFieldType.STRING).description("開始予定時刻"),
                         fieldWithPath("end_date_time").type(JsonFieldType.STRING).description("終了予定時刻"),
                         fieldWithPath("survey_questions").type(JsonFieldType.ARRAY).description("アンケート設問"),
@@ -163,6 +165,7 @@ class SurveyHandlerTest {
                 assertThat(res).isNotNull();
                 assertThat(res.size()).isEqualTo(1);
                 assertThat(res.get(0).get("survey_id").asText()).isEqualTo(survey1.getSurveyId().toString());
+                assertThat(res.get(0).get("survey_title").asText()).isEqualTo(survey1.getSurveyTitle());
                 assertThat(OffsetDateTime.parse(res.get(0).get("start_date_time").asText())).isEqualTo(survey1.getStartDateTime());
                 assertThat(OffsetDateTime.parse(res.get(0).get("end_date_time").asText())).isEqualTo(survey1.getEndDateTime());
             })
@@ -171,6 +174,7 @@ class SurveyHandlerTest {
                     responseHeaders(headerWithName(CONTENT_TYPE).description(APPLICATION_JSON_VALUE)),
                     responseFields(
                         fieldWithPath("[].survey_id").type(JsonFieldType.STRING).description("アンケートID"),
+                        fieldWithPath("[].survey_title").type(JsonFieldType.STRING).description("アンケートタイトル"),
                         fieldWithPath("[].start_date_time").type(JsonFieldType.STRING).description("開始予定時刻"),
                         fieldWithPath("[].end_date_time").type(JsonFieldType.STRING).description("終了予定時刻"))));
     }
@@ -179,7 +183,7 @@ class SurveyHandlerTest {
     void postSurveys() {
         final OffsetDateTime startDateTime = OffsetDateTime.of(2019, 9, 1, 0, 0, 0, 0, ZoneOffset.UTC);
         final OffsetDateTime endDateTime = OffsetDateTime.of(2019, 9, 1, 0, 0, 0, 0, ZoneOffset.UTC);
-        final Map<String, Object> requestBody = Map.of("start_date_time", startDateTime.toString(), "end_date_time", endDateTime.toString());
+        final Map<String, Object> requestBody = Map.of("survey_title", "テストアンケート", "start_date_time", startDateTime.toString(), "end_date_time", endDateTime.toString());
 
         this.testClient.post()
             .uri("/surveys")
@@ -197,6 +201,7 @@ class SurveyHandlerTest {
                 final URI location = result.getResponseHeaders().getLocation();
                 assertThat(location).isNotNull();
                 assertThat(location.toString()).endsWith("/surveys/" + surveyId);
+                assertThat(res.get("survey_title").asText()).isEqualTo("テストアンケート");
                 assertThat(OffsetDateTime.parse(res.get("start_date_time").asText())).isEqualTo(startDateTime);
                 assertThat(OffsetDateTime.parse(res.get("end_date_time").asText())).isEqualTo(endDateTime);
                 final Mono<Survey> surveyMono = this.surveyRepository.findById(Survey.Id.valueOf(surveyId));
@@ -213,6 +218,7 @@ class SurveyHandlerTest {
                 document("post-surveys",
                     requestHeaders(headerWithName(CONTENT_TYPE).description(APPLICATION_JSON_VALUE)),
                     requestFields(
+                        fieldWithPath("survey_title").type(JsonFieldType.STRING).description("アンケートタイトル"),
                         fieldWithPath("start_date_time").type(JsonFieldType.STRING).description("開始予定時刻"),
                         fieldWithPath("end_date_time").type(JsonFieldType.STRING).description("終了予定時刻")),
                     responseHeaders(
@@ -220,6 +226,7 @@ class SurveyHandlerTest {
                         headerWithName(LOCATION).description("アンケートのURL")),
                     responseFields(
                         fieldWithPath("survey_id").type(JsonFieldType.STRING).description("アンケートID"),
+                        fieldWithPath("survey_title").type(JsonFieldType.STRING).description("アンケートタイトル"),
                         fieldWithPath("start_date_time").type(JsonFieldType.STRING).description("開始予定時刻"),
                         fieldWithPath("end_date_time").type(JsonFieldType.STRING).description("終了予定時刻"))));
 

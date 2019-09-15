@@ -22,6 +22,7 @@ public class SurveyRepository {
 
     private final Function<Row, Survey> surveyRowMapper = row -> new Survey.Builder()
         .withSurveyId(Survey.Id.valueOf(row.get("survey_id", String.class)))
+        .withSurveyTitle(row.get("survey_title", String.class))
         .withStartDateTime(row.get("start_date_time", OffsetDateTime.class))
         .withEndDateTime(row.get("end_date_time", OffsetDateTime.class))
         .build();
@@ -49,6 +50,7 @@ public class SurveyRepository {
         return surveyMono.delayUntil(survey ->
             this.databaseClient.execute(this.sqlSupplier.file("sql/survey/insert.sql"))
                 .bind("survey_id", survey.getSurveyId().toString())
+                .bind("survey_title", survey.getSurveyTitle())
                 .bind("start_date_time", survey.getStartDateTime())
                 .bind("end_date_time", survey.getEndDateTime())
                 .then())
