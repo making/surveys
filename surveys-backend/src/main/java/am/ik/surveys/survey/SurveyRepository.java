@@ -52,8 +52,8 @@ public class SurveyRepository {
                 .bind("start_date_time", survey.getStartDateTime())
                 .bind("end_date_time", survey.getEndDateTime())
                 .then())
-            .as(transactionalOperator::transactional)
-            .flatMap(survey -> this.findById(survey.getSurveyId()));
+            .flatMap(survey -> this.findById(survey.getSurveyId()))
+            .as(transactionalOperator::transactional);
     }
 
     public Mono<Void> deleteById(Survey.Id surveyId) {

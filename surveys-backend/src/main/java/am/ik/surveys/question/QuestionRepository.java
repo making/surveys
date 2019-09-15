@@ -80,8 +80,8 @@ public class QuestionRepository {
                     .then();
             }
         })
-            .as(transactionalOperator::transactional)
-            .flatMap(question -> this.findById(question.getQuestionId()));
+            .flatMap(question -> this.findById(question.getQuestionId()))
+            .as(transactionalOperator::transactional);
     }
 
     public Mono<Void> delete(Question.Id questionId) {
