@@ -1,6 +1,7 @@
 package am.ik.surveys.answer.web;
 
 import am.ik.surveys.answer.Answer;
+import am.ik.surveys.answer.AnswerDetail;
 import am.ik.surveys.answer.AnswerDetailRepository;
 import am.ik.surveys.answer.AnswerRepository;
 import am.ik.surveys.survey.Survey;
@@ -15,6 +16,9 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class AnswerHandler {
@@ -43,7 +47,19 @@ public class AnswerHandler {
     Mono<ServerResponse> getAnswersBySurveyId(ServerRequest req) {
         final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("survey_id"));
         final Flux<Answer> answerFlux = this.answerRepository.findAllBySurveyId(surveyId);
-        final Flux<AnswerResponse> answerResponseFlux = answerFlux.flatMap(answer -> AnswerResponse.from(answer, answerDetailRepository));
+        final Mono<Map<Answer.Id, List<AnswerDetail<?>>>> answerDetailMapMono = this.answerDetailRepository.findAllBySurveyId(surveyId)
+            .collect(Collectors.groupingBy(AnswerDetail::getAnswerId));
+        final Flux<AnswerResponse> answerResponseFlux = answerFlux.collectList().zipWith(answerDetailMapMono)
+            .flatMapMany(tpl -> {
+                final List<Answer> answers = tpl.getT1();
+                final Map<Answer.Id, List<AnswerDetail<?>>> detailMap = tpl.getT2();
+                return Flux.fromStream(answers.stream()
+                    .map(answer -> {
+                        final Answer.Id answerId = answer.getAnswerId();
+                        final List<AnswerDetail<?>> answerDetails = detailMap.get(answerId);
+                        return new AnswerResponse(answer, answerDetails);
+                    }));
+            });
         return ServerResponse.ok().body(answerResponseFlux, AnswerResponse.class);
     }
 

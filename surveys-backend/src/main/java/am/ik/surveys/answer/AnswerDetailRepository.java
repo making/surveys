@@ -2,6 +2,7 @@ package am.ik.surveys.answer;
 
 import am.ik.surveys.infra.sql.SqlSupplier;
 import am.ik.surveys.questionchoice.QuestionChoice;
+import am.ik.surveys.survey.Survey;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
@@ -46,8 +47,29 @@ public class AnswerDetailRepository {
             .all()
             .map(Function.identity());
         return chosenAnswers
-            .concatWith(descriptiveAnswers)
-            .sort(Comparator.comparing(a -> a.getAnswerId().toString()));
+            .concatWith(descriptiveAnswers);
+    }
+
+    public Flux<AnswerDetail<?>> findAllBySurveyId(Survey.Id surveyId) {
+        final Flux<AnswerDetail<?>> chosenAnswers = this.databaseClient.execute(this.sqlSupplier.file("sql/answer/findAllChosenAnswerBySurveyId.sql"))
+            .bind("survey_id", surveyId.toString())
+            .map(row -> new ChosenAnswer.Builder()
+                .withAnswerId(Answer.Id.valueOf(row.get("answer_id", String.class)))
+                .withQuestionChoiceId(QuestionChoice.Id.valueOf(row.get("question_choice_id", String.class)))
+                .withAnswerText(row.get("answer_text", String.class))
+                .build())
+            .all()
+            .map(Function.identity());
+        final Flux<AnswerDetail<?>> descriptiveAnswers = this.databaseClient.execute(this.sqlSupplier.file("sql/answer/findAllDescriptiveAnswerBySurveyId.sql"))
+            .bind("survey_id", surveyId.toString())
+            .map(row -> new DescriptiveAnswer.Builder()
+                .withAnswerId(Answer.Id.valueOf(row.get("answer_id", String.class)))
+                .withAnswerText(row.get("answer_text", String.class))
+                .build())
+            .all()
+            .map(Function.identity());
+        return chosenAnswers
+            .concatWith(descriptiveAnswers);
     }
 
     public Flux<AnswerDetail<?>> insert(List<AnswerDetail<?>> answerDetails) {
