@@ -24,6 +24,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.springframework.boot.experimental</groupId>
+            <artifactId>spring-boot-starter-data-r2dbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.r2dbc</groupId>
+            <artifactId>r2dbc-h2</artifactId>
+        </dependency>
+        <dependency>
             <groupId>am.ik.surveys</groupId>
             <artifactId>surveys-frontend</artifactId>
         </dependency>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <!--    <logger name="io.r2dbc.h2.client.SessionClient" level="DEBUG"/>-->
+    <logger name="org.springframework.data.r2dbc.core.DefaultDatabaseClient" level="DEBUG"/>
+    <logger name="org.springframework.data.r2dbc.connectionfactory.init.ScriptUtils" level="DEBUG"/>
+    <logger name="org.springframework.web" level="DEBUG"/>
+</configuration>

@@ -1,4 +1,4 @@
-package am.ik.surveys.ulid;
+package am.ik.surveys.infra.ulid;
 
 import de.huxhorn.sulky.ulid.ULID;
 import org.springframework.core.convert.converter.Converter;

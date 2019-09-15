@@ -55,7 +55,7 @@ public class AnswerHandler {
                 answerRequest.toAnswerDetails(answerId)
             ))
             .flatMap(tpl -> this.answerRepository.insert(tpl.getT1())
-                .flatMap(answer -> this.answerDetailRepository.insert(tpl.getT2())
+                .flatMap(answer -> this.answerDetailRepository.insert(tpl.getT2()).collectList()
                     .map(details -> new AnswerResponse(answer, details))));
         final URI location = req.uriBuilder().replacePath("answers/{answer_id}").build(answerId);
         return ServerResponse.created(location).body(answerResponseMono, AnswerResponse.class);

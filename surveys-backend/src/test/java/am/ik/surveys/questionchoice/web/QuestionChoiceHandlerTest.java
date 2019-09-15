@@ -2,16 +2,21 @@ package am.ik.surveys.questionchoice.web;
 
 import am.ik.surveys.Fixtures;
 import am.ik.surveys.TestUtils;
+import am.ik.surveys.infra.sql.SqlSupplier;
+import am.ik.surveys.question.QuestionRepository;
 import am.ik.surveys.questionchoice.QuestionChoice;
 import am.ik.surveys.questionchoice.QuestionChoiceRepository;
 import com.fasterxml.jackson.databind.JsonNode;
+import io.r2dbc.spi.ConnectionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -35,10 +40,24 @@ class QuestionChoiceHandlerTest {
 
     @BeforeEach
     void setUp(RestDocumentationContextProvider restDocumentation) {
-        this.questionChoiceRepository = new QuestionChoiceRepository();
+        final ConnectionFactory connectionFactory = TestUtils.connectionFactory();
+        final DatabaseClient databaseClient = TestUtils.databaseClient(connectionFactory);
+        final TransactionalOperator transactionalOperator = TestUtils.transactionalOperator(connectionFactory);
+        final SqlSupplier sqlSupplier = TestUtils.sqlSupplier();
+        this.questionChoiceRepository = new QuestionChoiceRepository(databaseClient, transactionalOperator, sqlSupplier);
+        final QuestionRepository questionRepository = new QuestionRepository(databaseClient, transactionalOperator, sqlSupplier);
         final QuestionChoiceHandler questionChoiceHandler = new QuestionChoiceHandler(questionChoiceRepository);
         this.testClient = TestUtils.webTestClient(questionChoiceHandler.routes(), restDocumentation)
             .build();
+
+        Fixtures.questions.forEach(question ->
+            StepVerifier.create(questionRepository.insert(Mono.just(question)))
+                .expectNext(question)
+                .verifyComplete());
+        Fixtures.questionChoices.forEach(questionChoice ->
+            StepVerifier.create(this.questionChoiceRepository.insert(Mono.just(questionChoice)))
+                .expectNext(questionChoice)
+                .verifyComplete());
     }
 
     @Test

@@ -8,19 +8,26 @@ import am.ik.surveys.answer.AnswerDetailRepository;
 import am.ik.surveys.answer.AnswerRepository;
 import am.ik.surveys.answer.ChosenAnswer;
 import am.ik.surveys.answer.DescriptiveAnswer;
+import am.ik.surveys.infra.sql.SqlSupplier;
 import am.ik.surveys.question.Question;
+import am.ik.surveys.question.QuestionRepository;
 import am.ik.surveys.questionchoice.QuestionChoice;
+import am.ik.surveys.questionchoice.QuestionChoiceRepository;
 import am.ik.surveys.survey.Survey;
+import am.ik.surveys.survey.SurveyRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import de.huxhorn.sulky.ulid.ULID;
+import io.r2dbc.spi.ConnectionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -55,11 +62,35 @@ class AnswerHandlerTest {
 
     @BeforeEach
     void setUp(RestDocumentationContextProvider restDocumentation) {
-        this.answerRepository = new AnswerRepository();
-        this.answerDetailRepository = new AnswerDetailRepository();
+        final ConnectionFactory connectionFactory = TestUtils.connectionFactory();
+        final DatabaseClient databaseClient = TestUtils.databaseClient(connectionFactory);
+        final TransactionalOperator transactionalOperator = TestUtils.transactionalOperator(connectionFactory);
+        final SqlSupplier sqlSupplier = TestUtils.sqlSupplier();
+        this.answerRepository = new AnswerRepository(databaseClient, transactionalOperator, sqlSupplier);
+        this.answerDetailRepository = new AnswerDetailRepository(databaseClient, transactionalOperator, sqlSupplier);
+        final SurveyRepository surveyRepository = new SurveyRepository(databaseClient, transactionalOperator, sqlSupplier);
+        final QuestionRepository questionRepository = new QuestionRepository(databaseClient, transactionalOperator, sqlSupplier);
+        final QuestionChoiceRepository questionChoiceRepository = new QuestionChoiceRepository(databaseClient, transactionalOperator, sqlSupplier);
         final AnswerHandler answerHandler = new AnswerHandler(this.ulid, answerRepository, answerDetailRepository);
         this.testClient = TestUtils.webTestClient(answerHandler.routes(), restDocumentation)
             .build();
+
+        Fixtures.surveys.forEach(survey ->
+            StepVerifier.create(surveyRepository.insert(Mono.just(survey)))
+                .expectNext(survey)
+                .verifyComplete());
+        Fixtures.questions.forEach(question -> StepVerifier.create(questionRepository.insert(Mono.just(question)))
+            .expectNext(question)
+            .verifyComplete());
+        Fixtures.questionChoices.forEach(questionChoice ->
+            StepVerifier.create(questionChoiceRepository.insert(Mono.just(questionChoice)))
+                .expectNext(questionChoice)
+                .verifyComplete());
+        Fixtures.answers.forEach(answer ->
+            StepVerifier.create(this.answerRepository.insert(answer))
+                .expectNext(answer)
+                .verifyComplete());
+        this.answerDetailRepository.insert(Fixtures.answerDetails).blockLast();
     }
 
     @Test

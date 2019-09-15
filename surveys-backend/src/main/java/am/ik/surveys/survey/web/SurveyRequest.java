@@ -2,13 +2,16 @@ package am.ik.surveys.survey.web;
 
 import am.ik.surveys.survey.Survey;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 public class SurveyRequest {
 
-    private OffsetDateTime startDateTime = OffsetDateTime.MIN;
+    private OffsetDateTime startDateTime = Instant.ofEpochSecond(0).atOffset(ZoneOffset.UTC);
 
-    private OffsetDateTime endDateTime = OffsetDateTime.MAX;
+    private OffsetDateTime endDateTime = LocalDate.of(3000, 1, 1).atStartOfDay().atOffset(ZoneOffset.UTC);
 
     public OffsetDateTime getStartDateTime() {
         return startDateTime;
