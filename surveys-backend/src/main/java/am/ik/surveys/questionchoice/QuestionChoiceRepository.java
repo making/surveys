@@ -2,6 +2,7 @@ package am.ik.surveys.questionchoice;
 
 import am.ik.surveys.infra.sql.SqlSupplier;
 import am.ik.surveys.question.Question;
+import am.ik.surveys.survey.Survey;
 import io.r2dbc.spi.Row;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
@@ -44,6 +45,13 @@ public class QuestionChoiceRepository {
     public Flux<QuestionChoice> findAllByQuestionId(Question.Id questionId) {
         return this.databaseClient.execute(this.sqlSupplier.file("sql/questionchoice/findAllByQuestionId.sql"))
             .bind("question_id", questionId.toString())
+            .map(questionChoiceRowMapper)
+            .all();
+    }
+
+    public Flux<QuestionChoice> findAllBySurveyId(Survey.Id surveyId) {
+        return this.databaseClient.execute(this.sqlSupplier.file("sql/questionchoice/findAllBySurveyId.sql"))
+            .bind("survey_id", surveyId.toString())
             .map(questionChoiceRowMapper)
             .all();
     }

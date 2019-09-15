@@ -1,9 +1,11 @@
 package am.ik.surveys.question;
 
 import am.ik.surveys.infra.sql.SqlSupplier;
+import am.ik.surveys.survey.Survey;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -42,6 +44,25 @@ public class QuestionRepository {
         return selectiveQuestion.switchIfEmpty(question);
     }
 
+    public Flux<Question> findBySurveyId(Survey.Id surveyId) {
+        final Flux<Question> question = this.databaseClient.execute(this.sqlSupplier.file("sql/question/findAllQuestionBySurveyId.sql"))
+            .bind("survey_id", surveyId.toString())
+            .map(row -> new Question.Builder()
+                .withQuestionId(Question.Id.valueOf(row.get("question_id", String.class)))
+                .withQuestionText(row.get("question_text", String.class))
+                .build())
+            .all();
+        final Flux<Question> selectiveQuestion = this.databaseClient.execute(this.sqlSupplier.file("sql/question/findAllSelectiveQuestionBySurveyId.sql"))
+            .bind("survey_id", surveyId.toString())
+            .map(row -> new SelectiveQuestion.Builder()
+                .withQuestionId(Question.Id.valueOf(row.get("question_id", String.class)))
+                .withQuestionText(row.get("question_text", String.class))
+                .withMaxChoices(row.get("max_choices", Integer.class))
+                .build())
+            .all()
+            .cast(Question.class);
+        return selectiveQuestion.concatWith(question);
+    }
 
     public Mono<Question> insert(Mono<Question> questionMono) {
         return questionMono.delayUntil(question -> {

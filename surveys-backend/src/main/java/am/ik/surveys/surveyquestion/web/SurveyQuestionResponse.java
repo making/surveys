@@ -3,10 +3,14 @@ package am.ik.surveys.surveyquestion.web;
 import am.ik.surveys.question.Question;
 import am.ik.surveys.question.QuestionRepository;
 import am.ik.surveys.question.web.QuestionResponse;
+import am.ik.surveys.question.web.SelectiveQuestionResponse;
+import am.ik.surveys.questionchoice.QuestionChoice;
 import am.ik.surveys.questionchoice.QuestionChoiceRepository;
 import am.ik.surveys.surveyquestion.SurveyQuestion;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 public class SurveyQuestionResponse {
 
@@ -41,5 +45,13 @@ public class SurveyQuestionResponse {
         final Mono<Question> questionMono = questionRepository.findById(surveyQuestion.getQuestionId());
         final Mono<QuestionResponse> questionResponseMono = questionMono.flatMap(question -> QuestionResponse.from(question, questionChoiceRepository));
         return questionResponseMono.map(questionResponse -> new SurveyQuestionResponse(surveyQuestion, questionResponse));
+    }
+
+    public static SurveyQuestionResponse create(SurveyQuestion surveyQuestion, Question question, List<QuestionChoice> questionChoices) {
+        if (questionChoices != null) {
+            return new SurveyQuestionResponse(surveyQuestion, new SelectiveQuestionResponse(question, questionChoices));
+        } else {
+            return new SurveyQuestionResponse(surveyQuestion, new QuestionResponse(question));
+        }
     }
 }

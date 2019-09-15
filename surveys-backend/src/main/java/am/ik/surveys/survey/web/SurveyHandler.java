@@ -1,6 +1,8 @@
 package am.ik.surveys.survey.web;
 
+import am.ik.surveys.question.Question;
 import am.ik.surveys.question.QuestionRepository;
+import am.ik.surveys.questionchoice.QuestionChoice;
 import am.ik.surveys.questionchoice.QuestionChoiceRepository;
 import am.ik.surveys.survey.Survey;
 import am.ik.surveys.survey.SurveyRepository;
@@ -17,6 +19,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class SurveyHandler {
@@ -60,8 +66,24 @@ public class SurveyHandler {
         final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("survey_id"));
         final Mono<Survey> surveyMono = this.surveyRepository.findById(surveyId);
         final Flux<SurveyQuestion> surveyQuestionFlux = this.surveyQuestionRepository.findBySurveyId(surveyId);
-        final Flux<SurveyQuestionResponse> surveyQuestionResponseFlux = surveyQuestionFlux.flatMap(surveyQuestion -> SurveyQuestionResponse.from(surveyQuestion, this.questionRepository,
-            this.questionChoiceRepository));
+        final Mono<Map<Question.Id, Question>> questionMapMono = this.questionRepository.findBySurveyId(surveyId)
+            .collectMap(Question::getQuestionId, Function.identity());
+        final Mono<Map<Question.Id, List<QuestionChoice>>> questionChoicesMapMono = this.questionChoiceRepository.findAllBySurveyId(surveyId)
+            .collect(Collectors.groupingBy(QuestionChoice::getQuestionId));
+        final Flux<SurveyQuestionResponse> surveyQuestionResponseFlux = Mono.zip(surveyQuestionFlux.collectList(), questionMapMono, questionChoicesMapMono)
+            .flatMapMany(tpl -> {
+                final List<SurveyQuestion> surveyQuestions = tpl.getT1();
+                final Map<Question.Id, Question> questionMap = tpl.getT2();
+                final Map<Question.Id, List<QuestionChoice>> questionChoicesMap = tpl.getT3();
+                return Flux.fromStream(surveyQuestions.stream()
+                    .map(surveyQuestion -> {
+                        final Question.Id questionId = surveyQuestion.getQuestionId();
+                        final Question question = questionMap.get(questionId);
+                        final List<QuestionChoice> questionChoices = questionChoicesMap.get(questionId);
+                        return SurveyQuestionResponse.create(surveyQuestion, question, questionChoices);
+                    })
+                );
+            });
         final Mono<SurveyResponse> surveyResponseMono = surveyMono.zipWith(surveyQuestionResponseFlux.collectList())
             .map(tpl -> new SurveyResponse(tpl.getT1(), tpl.getT2()));
         return ServerResponse.ok().body(surveyResponseMono, SurveyResponse.class);
