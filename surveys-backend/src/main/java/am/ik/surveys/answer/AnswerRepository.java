@@ -66,4 +66,11 @@ public class AnswerRepository {
             .then()
             .as(transactionalOperator::transactional);
     }
+
+    public Mono<Void> deleteBySurveyId(Survey.Id surveyId) {
+        return this.databaseClient.execute(this.sqlSupplier.file("sql/answer/deleteAnswerBySurveyId.sql"))
+            .bind("survey_id", surveyId.toString())
+            .then()
+            .as(transactionalOperator::transactional);
+    }
 }

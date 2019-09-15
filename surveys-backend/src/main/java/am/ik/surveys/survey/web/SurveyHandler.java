@@ -1,5 +1,7 @@
 package am.ik.surveys.survey.web;
 
+import am.ik.surveys.answer.AnswerDetailRepository;
+import am.ik.surveys.answer.AnswerRepository;
 import am.ik.surveys.question.Question;
 import am.ik.surveys.question.QuestionRepository;
 import am.ik.surveys.questionchoice.QuestionChoice;
@@ -11,6 +13,7 @@ import am.ik.surveys.surveyquestion.SurveyQuestionRepository;
 import am.ik.surveys.surveyquestion.web.SurveyQuestionResponse;
 import de.huxhorn.sulky.ulid.ULID;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -35,15 +38,25 @@ public class SurveyHandler {
 
     private final SurveyRepository surveyRepository;
 
+    private final AnswerRepository answerRepository;
+
+    private final AnswerDetailRepository answerDetailRepository;
+
+    private final TransactionalOperator transactionalOperator;
+
     private final ULID ulid;
 
     public SurveyHandler(ULID ulid, SurveyRepository surveyRepository, SurveyQuestionRepository surveyQuestionRepository, QuestionRepository questionRepository,
-                         QuestionChoiceRepository questionChoiceRepository) {
+                         QuestionChoiceRepository questionChoiceRepository, AnswerRepository answerRepository, AnswerDetailRepository answerDetailRepository,
+                         TransactionalOperator transactionalOperator) {
         this.ulid = ulid;
         this.surveyRepository = surveyRepository;
         this.surveyQuestionRepository = surveyQuestionRepository;
         this.questionRepository = questionRepository;
         this.questionChoiceRepository = questionChoiceRepository;
+        this.answerRepository = answerRepository;
+        this.answerDetailRepository = answerDetailRepository;
+        this.transactionalOperator = transactionalOperator;
     }
 
     public RouterFunction<ServerResponse> routes() {
@@ -58,7 +71,10 @@ public class SurveyHandler {
     Mono<ServerResponse> deleteSurvey(ServerRequest req) {
         final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("survey_id"));
         return this.surveyQuestionRepository.deleteBySurveyId(surveyId)
+            .then(this.answerDetailRepository.deleteBySurveyId(surveyId))
+            .then(this.answerRepository.deleteBySurveyId(surveyId))
             .then(this.surveyRepository.deleteById(surveyId))
+            .as(this.transactionalOperator::transactional)
             .then(ServerResponse.noContent().build());
     }
 

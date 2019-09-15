@@ -2,6 +2,8 @@ package am.ik.surveys.survey.web;
 
 import am.ik.surveys.Fixtures;
 import am.ik.surveys.TestUtils;
+import am.ik.surveys.answer.AnswerDetailRepository;
+import am.ik.surveys.answer.AnswerRepository;
 import am.ik.surveys.infra.sql.SqlSupplier;
 import am.ik.surveys.question.QuestionRepository;
 import am.ik.surveys.questionchoice.QuestionChoiceRepository;
@@ -68,7 +70,10 @@ class SurveyHandlerTest {
         this.surveyRepository = new SurveyRepository(databaseClient, transactionalOperator, sqlSupplier);
         this.questionRepository = new QuestionRepository(databaseClient, transactionalOperator, sqlSupplier);
         this.surveyQuestionRepository = new SurveyQuestionRepository(databaseClient, transactionalOperator, sqlSupplier);
-        final SurveyHandler surveyHandler = new SurveyHandler(this.ulid, surveyRepository, surveyQuestionRepository, questionRepository, questionChoiceRepository);
+        final AnswerRepository answerRepository = new AnswerRepository(databaseClient, transactionalOperator, sqlSupplier);
+        final AnswerDetailRepository answerDetailRepository = new AnswerDetailRepository(databaseClient, transactionalOperator, sqlSupplier);
+        final SurveyHandler surveyHandler = new SurveyHandler(this.ulid, surveyRepository, surveyQuestionRepository, questionRepository, questionChoiceRepository, answerRepository,
+            answerDetailRepository, transactionalOperator);
         this.testClient = TestUtils.webTestClient(surveyHandler.routes(), restDocumentation)
             .build();
 

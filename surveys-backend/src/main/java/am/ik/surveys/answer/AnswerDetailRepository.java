@@ -128,4 +128,14 @@ public class AnswerDetailRepository {
                 .as(transactionalOperator::transactional);
         }
     }
+
+    public Mono<Void> deleteBySurveyId(Survey.Id surveyId) {
+        return this.databaseClient.execute(this.sqlSupplier.file("sql/answer/deleteChosenAnswerBySurveyId.sql"))
+            .bind("survey_id", surveyId.toString())
+            .then()
+            .then(this.databaseClient.execute(this.sqlSupplier.file("sql/answer/deleteDescriptiveAnswerBySurveyId.sql"))
+                .bind("survey_id", surveyId.toString())
+                .then())
+            .as(transactionalOperator::transactional);
+    }
 }
