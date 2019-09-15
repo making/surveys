@@ -1,9 +1,9 @@
 package am.ik.surveys;
 
 import am.ik.surveys.answer.web.AnswerHandler;
+import am.ik.surveys.infra.sql.SqlSupplier;
 import am.ik.surveys.question.web.QuestionHandler;
 import am.ik.surveys.questionchoice.web.QuestionChoiceHandler;
-import am.ik.surveys.infra.sql.SqlSupplier;
 import am.ik.surveys.survey.web.SurveyHandler;
 import am.ik.surveys.surveyquestion.web.SurveyQuestionHandler;
 import de.huxhorn.sulky.ulid.ULID;
@@ -22,7 +22,7 @@ public class App {
     }
 
     @Bean
-    public RouterFunction<?> routes(GreetingHandler greetingHandler, WelcomeHandler welcomeHandler,
+    public RouterFunction<?> routes(WelcomeHandler welcomeHandler,
                                     SurveyHandler surveyHandler,
                                     SurveyQuestionHandler surveyQuestionHandler,
                                     AnswerHandler answerHandler,
