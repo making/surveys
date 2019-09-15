@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 import static org.springframework.restdocs.cli.CliDocumentation.curlRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpRequest;
 import static org.springframework.restdocs.http.HttpDocumentation.httpResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.modifyUris;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.documentationConfiguration;
 
@@ -47,7 +48,11 @@ public class TestUtils {
             .configureClient()
             .filter(documentationConfiguration(restDocumentation)
                 .operationPreprocessors()
-                .withRequestDefaults(prettyPrint())
+                .withRequestDefaults(modifyUris()
+                        .scheme("https")
+                        .host("surveys.cfapps.io")
+                        .removePort()
+                    , prettyPrint())
                 .withResponseDefaults(prettyPrint())
                 .and()
                 .snippets().withDefaults(httpRequest(), httpResponse(), curlRequest()));

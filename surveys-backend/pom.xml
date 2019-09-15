@@ -16,9 +16,9 @@
         <asciidoctor.version>1.5.6</asciidoctor.version>
         <restdocs-api-spec.version>0.9.4</restdocs-api-spec.version>
         <restdocs-spec.version>0.15</restdocs-spec.version>
-        <restdoc.scheme>http</restdoc.scheme>
-        <restdoc.host>localhost</restdoc.host>
-        <restdoc.port>8080</restdoc.port>
+        <restdoc.scheme>https</restdoc.scheme>
+        <restdoc.host>surveys.cfapps.io</restdoc.host>
+        <restdoc.port>443</restdoc.port>
         <docs.resources.version>0.1.2.RELEASE</docs.resources.version>
     </properties>
 
