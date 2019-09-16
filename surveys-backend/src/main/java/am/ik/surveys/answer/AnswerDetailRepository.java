@@ -3,6 +3,7 @@ package am.ik.surveys.answer;
 import am.ik.surveys.infra.sql.SqlSupplier;
 import am.ik.surveys.questionchoice.QuestionChoice;
 import am.ik.surveys.survey.Survey;
+import io.r2dbc.spi.Row;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
@@ -22,6 +23,17 @@ public class AnswerDetailRepository {
 
     private final SqlSupplier sqlSupplier;
 
+    private final Function<Row, ChosenAnswer> chosenAnswerRowMapper = row -> new ChosenAnswer.Builder()
+        .withAnswerId(Answer.Id.valueOf(row.get("answer_id", String.class)))
+        .withQuestionChoiceId(QuestionChoice.Id.valueOf(row.get("question_choice_id", String.class)))
+        .withAnswerText(row.get("answer_text", String.class))
+        .build();
+
+    final Function<Row, DescriptiveAnswer> descriptiveAnswerRowMapper = row -> new DescriptiveAnswer.Builder()
+        .withAnswerId(Answer.Id.valueOf(row.get("answer_id", String.class)))
+        .withAnswerText(row.get("answer_text", String.class))
+        .build();
+
     public AnswerDetailRepository(DatabaseClient databaseClient, TransactionalOperator transactionalOperator, SqlSupplier sqlSupplier) {
         this.databaseClient = databaseClient;
         this.transactionalOperator = transactionalOperator;
@@ -29,21 +41,15 @@ public class AnswerDetailRepository {
     }
 
     public Flux<AnswerDetail<?>> findAllByAnswerId(Answer.Id answerId) {
+
         final Flux<AnswerDetail<?>> chosenAnswers = this.databaseClient.execute(this.sqlSupplier.file("sql/answer/findAllChosenAnswerById.sql"))
             .bind("answer_id", answerId.toString())
-            .map(row -> new ChosenAnswer.Builder()
-                .withAnswerId(Answer.Id.valueOf(row.get("answer_id", String.class)))
-                .withQuestionChoiceId(QuestionChoice.Id.valueOf(row.get("question_choice_id", String.class)))
-                .withAnswerText(row.get("answer_text", String.class))
-                .build())
+            .map(this.chosenAnswerRowMapper)
             .all()
             .map(Function.identity());
         final Flux<AnswerDetail<?>> descriptiveAnswers = this.databaseClient.execute(this.sqlSupplier.file("sql/answer/findAllDescriptiveAnswerById.sql"))
             .bind("answer_id", answerId.toString())
-            .map(row -> new DescriptiveAnswer.Builder()
-                .withAnswerId(Answer.Id.valueOf(row.get("answer_id", String.class)))
-                .withAnswerText(row.get("answer_text", String.class))
-                .build())
+            .map(this.descriptiveAnswerRowMapper)
             .all()
             .map(Function.identity());
         return chosenAnswers
@@ -53,19 +59,12 @@ public class AnswerDetailRepository {
     public Flux<AnswerDetail<?>> findAllBySurveyId(Survey.Id surveyId) {
         final Flux<AnswerDetail<?>> chosenAnswers = this.databaseClient.execute(this.sqlSupplier.file("sql/answer/findAllChosenAnswerBySurveyId.sql"))
             .bind("survey_id", surveyId.toString())
-            .map(row -> new ChosenAnswer.Builder()
-                .withAnswerId(Answer.Id.valueOf(row.get("answer_id", String.class)))
-                .withQuestionChoiceId(QuestionChoice.Id.valueOf(row.get("question_choice_id", String.class)))
-                .withAnswerText(row.get("answer_text", String.class))
-                .build())
+            .map(this.chosenAnswerRowMapper)
             .all()
             .map(Function.identity());
         final Flux<AnswerDetail<?>> descriptiveAnswers = this.databaseClient.execute(this.sqlSupplier.file("sql/answer/findAllDescriptiveAnswerBySurveyId.sql"))
             .bind("survey_id", surveyId.toString())
-            .map(row -> new DescriptiveAnswer.Builder()
-                .withAnswerId(Answer.Id.valueOf(row.get("answer_id", String.class)))
-                .withAnswerText(row.get("answer_text", String.class))
-                .build())
+            .map(this.descriptiveAnswerRowMapper)
             .all()
             .map(Function.identity());
         return chosenAnswers
