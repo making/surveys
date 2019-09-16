@@ -21,16 +21,18 @@ public class QuestionRepository {
     private final SqlSupplier sqlSupplier;
 
     private final Function<Row, Question> questionRowMapper = row -> {
+        final String questionId = row.get("question_id", String.class);
         final Integer maxChoices = row.get("max_choices", Integer.class);
+        final String questionText = row.get("question_text", String.class);
         if (maxChoices == null) {
             return new Question.Builder()
-                .withQuestionId(Question.Id.valueOf(row.get("question_id", String.class)))
-                .withQuestionText(row.get("question_text", String.class))
+                .withQuestionId(Question.Id.valueOf(questionId))
+                .withQuestionText(questionText)
                 .build();
         } else {
             return new SelectiveQuestion.Builder()
-                .withQuestionId(Question.Id.valueOf(row.get("question_id", String.class)))
-                .withQuestionText(row.get("question_text", String.class))
+                .withQuestionId(Question.Id.valueOf(questionId))
+                .withQuestionText(questionText)
                 .withMaxChoices(maxChoices)
                 .build();
         }

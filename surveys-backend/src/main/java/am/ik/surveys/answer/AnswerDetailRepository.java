@@ -24,17 +24,19 @@ public class AnswerDetailRepository {
     private final SqlSupplier sqlSupplier;
 
     private final Function<Row, AnswerDetail<?>> answerDetailRowMapper = row -> {
+        final String answerId = row.get("answer_id", String.class);
         final String questionChoiceId = row.get("question_choice_id", String.class);
+        final String answerText = row.get("answer_text", String.class);
         if (questionChoiceId == null) {
             return new DescriptiveAnswer.Builder()
-                .withAnswerId(Answer.Id.valueOf(row.get("answer_id", String.class)))
-                .withAnswerText(row.get("answer_text", String.class))
+                .withAnswerId(Answer.Id.valueOf(answerId))
+                .withAnswerText(answerText)
                 .build();
         } else {
             return new ChosenAnswer.Builder()
-                .withAnswerId(Answer.Id.valueOf(row.get("answer_id", String.class)))
+                .withAnswerId(Answer.Id.valueOf(answerId))
                 .withQuestionChoiceId(QuestionChoice.Id.valueOf(questionChoiceId))
-                .withAnswerText(row.get("answer_text", String.class))
+                .withAnswerText(answerText)
                 .build();
         }
     };
