@@ -23,16 +23,21 @@ public class AnswerDetailRepository {
 
     private final SqlSupplier sqlSupplier;
 
-    private final Function<Row, ChosenAnswer> chosenAnswerRowMapper = row -> new ChosenAnswer.Builder()
-        .withAnswerId(Answer.Id.valueOf(row.get("answer_id", String.class)))
-        .withQuestionChoiceId(QuestionChoice.Id.valueOf(row.get("question_choice_id", String.class)))
-        .withAnswerText(row.get("answer_text", String.class))
-        .build();
-
-    final Function<Row, DescriptiveAnswer> descriptiveAnswerRowMapper = row -> new DescriptiveAnswer.Builder()
-        .withAnswerId(Answer.Id.valueOf(row.get("answer_id", String.class)))
-        .withAnswerText(row.get("answer_text", String.class))
-        .build();
+    private final Function<Row, AnswerDetail<?>> answerDetailRowMapper = row -> {
+        final String questionChoiceId = row.get("question_choice_id", String.class);
+        if (questionChoiceId == null) {
+            return new DescriptiveAnswer.Builder()
+                .withAnswerId(Answer.Id.valueOf(row.get("answer_id", String.class)))
+                .withAnswerText(row.get("answer_text", String.class))
+                .build();
+        } else {
+            return new ChosenAnswer.Builder()
+                .withAnswerId(Answer.Id.valueOf(row.get("answer_id", String.class)))
+                .withQuestionChoiceId(QuestionChoice.Id.valueOf(questionChoiceId))
+                .withAnswerText(row.get("answer_text", String.class))
+                .build();
+        }
+    };
 
     public AnswerDetailRepository(DatabaseClient databaseClient, TransactionalOperator transactionalOperator, SqlSupplier sqlSupplier) {
         this.databaseClient = databaseClient;
@@ -41,34 +46,17 @@ public class AnswerDetailRepository {
     }
 
     public Flux<AnswerDetail<?>> findAllByAnswerId(Answer.Id answerId) {
-
-        final Flux<AnswerDetail<?>> chosenAnswers = this.databaseClient.execute(this.sqlSupplier.file("sql/answer/findAllChosenAnswerById.sql"))
+        return this.databaseClient.execute(this.sqlSupplier.file("sql/answer/findAllAnswerDetailById.sql"))
             .bind("answer_id", answerId.toString())
-            .map(this.chosenAnswerRowMapper)
-            .all()
-            .map(Function.identity());
-        final Flux<AnswerDetail<?>> descriptiveAnswers = this.databaseClient.execute(this.sqlSupplier.file("sql/answer/findAllDescriptiveAnswerById.sql"))
-            .bind("answer_id", answerId.toString())
-            .map(this.descriptiveAnswerRowMapper)
-            .all()
-            .map(Function.identity());
-        return chosenAnswers
-            .concatWith(descriptiveAnswers);
+            .map(this.answerDetailRowMapper)
+            .all();
     }
 
     public Flux<AnswerDetail<?>> findAllBySurveyId(Survey.Id surveyId) {
-        final Flux<AnswerDetail<?>> chosenAnswers = this.databaseClient.execute(this.sqlSupplier.file("sql/answer/findAllChosenAnswerBySurveyId.sql"))
+        return this.databaseClient.execute(this.sqlSupplier.file("sql/answer/findAllAnswerDetailBySurveyId.sql"))
             .bind("survey_id", surveyId.toString())
-            .map(this.chosenAnswerRowMapper)
-            .all()
-            .map(Function.identity());
-        final Flux<AnswerDetail<?>> descriptiveAnswers = this.databaseClient.execute(this.sqlSupplier.file("sql/answer/findAllDescriptiveAnswerBySurveyId.sql"))
-            .bind("survey_id", surveyId.toString())
-            .map(this.descriptiveAnswerRowMapper)
-            .all()
-            .map(Function.identity());
-        return chosenAnswers
-            .concatWith(descriptiveAnswers);
+            .map(this.answerDetailRowMapper)
+            .all();
     }
 
     public Flux<AnswerDetail<?>> insert(List<AnswerDetail<?>> answerDetails) {
