@@ -1,8 +1,10 @@
 package am.ik.surveys.questionchoice.web;
 
+import am.ik.surveys.answer.AnswerDetailRepository;
 import am.ik.surveys.questionchoice.QuestionChoice;
 import am.ik.surveys.questionchoice.QuestionChoiceRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -14,8 +16,14 @@ public class QuestionChoiceHandler {
 
     private final QuestionChoiceRepository questionChoiceRepository;
 
-    public QuestionChoiceHandler(QuestionChoiceRepository questionChoiceRepository) {
+    private final AnswerDetailRepository answerDetailRepository;
+
+    private final TransactionalOperator transactionalOperator;
+
+    public QuestionChoiceHandler(QuestionChoiceRepository questionChoiceRepository, AnswerDetailRepository answerDetailRepository, TransactionalOperator transactionalOperator) {
         this.questionChoiceRepository = questionChoiceRepository;
+        this.answerDetailRepository = answerDetailRepository;
+        this.transactionalOperator = transactionalOperator;
     }
 
     public RouterFunction<ServerResponse> routes() {
@@ -35,7 +43,11 @@ public class QuestionChoiceHandler {
 
     private Mono<ServerResponse> deleteQuestionChoice(ServerRequest req) {
         final QuestionChoice.Id questionChoiceId = QuestionChoice.Id.valueOf(req.pathVariable("question_choice_id"));
-        final Mono<Void> questionChoiceMono = this.questionChoiceRepository.deleteById(questionChoiceId);
-        return questionChoiceMono.then(ServerResponse.noContent().build());
+        final Mono<Void> deleteAnswerDelete = this.answerDetailRepository.deleteByQuestionChoiceId(questionChoiceId);
+        final Mono<Void> deleteQuestionChoice = this.questionChoiceRepository.deleteById(questionChoiceId);
+        return deleteAnswerDelete
+            .then(deleteQuestionChoice)
+            .as(transactionalOperator::transactional)
+            .then(ServerResponse.noContent().build());
     }
 }

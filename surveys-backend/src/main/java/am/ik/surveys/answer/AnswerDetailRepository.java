@@ -127,4 +127,11 @@ public class AnswerDetailRepository {
                 .then())
             .as(transactionalOperator::transactional);
     }
+
+    public Mono<Void> deleteByQuestionChoiceId(QuestionChoice.Id questionChoiceId) {
+        return this.databaseClient.execute(this.sqlSupplier.file("sql/answer/deleteChosenAnswerByQuestionChoiceId.sql"))
+            .bind("question_choice_id", questionChoiceId.toString())
+            .then()
+            .as(transactionalOperator::transactional);
+    }
 }
