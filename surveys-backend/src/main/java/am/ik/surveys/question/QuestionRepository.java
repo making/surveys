@@ -20,17 +20,21 @@ public class QuestionRepository {
 
     private final SqlSupplier sqlSupplier;
 
-    private final Function<Row, Question> questionRowMapper = row -> new Question.Builder()
-        .withQuestionId(Question.Id.valueOf(row.get("question_id", String.class)))
-        .withQuestionText(row.get("question_text", String.class))
-        .build();
-
-    @SuppressWarnings("ConstantConditions")
-    private final Function<Row, SelectiveQuestion> selectiveQuestionRowMapper = row -> new SelectiveQuestion.Builder()
-        .withQuestionId(Question.Id.valueOf(row.get("question_id", String.class)))
-        .withQuestionText(row.get("question_text", String.class))
-        .withMaxChoices(row.get("max_choices", Integer.class))
-        .build();
+    private final Function<Row, Question> questionRowMapper = row -> {
+        final Integer maxChoices = row.get("max_choices", Integer.class);
+        if (maxChoices == null) {
+            return new Question.Builder()
+                .withQuestionId(Question.Id.valueOf(row.get("question_id", String.class)))
+                .withQuestionText(row.get("question_text", String.class))
+                .build();
+        } else {
+            return new SelectiveQuestion.Builder()
+                .withQuestionId(Question.Id.valueOf(row.get("question_id", String.class)))
+                .withQuestionText(row.get("question_text", String.class))
+                .withMaxChoices(maxChoices)
+                .build();
+        }
+    };
 
     public QuestionRepository(DatabaseClient databaseClient, TransactionalOperator transactionalOperator, SqlSupplier sqlSupplier) {
         this.databaseClient = databaseClient;
@@ -39,29 +43,17 @@ public class QuestionRepository {
     }
 
     public Mono<Question> findById(Question.Id questionId) {
-        final Mono<Question> question = this.databaseClient.execute(this.sqlSupplier.file("sql/question/findQuestionById.sql"))
+        return this.databaseClient.execute(this.sqlSupplier.file("sql/question/findQuestionById.sql"))
             .bind("question_id", questionId.toString())
             .map(this.questionRowMapper)
             .one();
-        final Mono<Question> selectiveQuestion = this.databaseClient.execute(this.sqlSupplier.file("sql/question/findSelectiveQuestionById.sql"))
-            .bind("question_id", questionId.toString())
-            .map(this.selectiveQuestionRowMapper)
-            .one()
-            .cast(Question.class);
-        return selectiveQuestion.switchIfEmpty(question);
     }
 
     public Flux<Question> findBySurveyId(Survey.Id surveyId) {
-        final Flux<Question> question = this.databaseClient.execute(this.sqlSupplier.file("sql/question/findAllQuestionBySurveyId.sql"))
+        return this.databaseClient.execute(this.sqlSupplier.file("sql/question/findAllQuestionBySurveyId.sql"))
             .bind("survey_id", surveyId.toString())
             .map(this.questionRowMapper)
             .all();
-        final Flux<Question> selectiveQuestion = this.databaseClient.execute(this.sqlSupplier.file("sql/question/findAllSelectiveQuestionBySurveyId.sql"))
-            .bind("survey_id", surveyId.toString())
-            .map(this.selectiveQuestionRowMapper)
-            .all()
-            .cast(Question.class);
-        return selectiveQuestion.concatWith(question);
     }
 
     public Mono<Question> insert(Mono<Question> questionMono) {
