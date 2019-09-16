@@ -8,6 +8,11 @@ Toshiaki Maki(@making);
 :sectlinks:
 
 [[openapi]]
+
+* link:https://scrapbox.io/kawasima/%E3%82%A2%E3%83%B3%E3%82%B1%E3%83%BC%E3%83%88[元ネタ]
+* link:https://github.com/making/surveys[ソースコード]
+* link:https://surveys.cfapps.io[Web UI (WIP)]
+
 == OpenAPI
 
 このドキュメントページの他に次のフォーマットでもドキュメントを利用可能です。
