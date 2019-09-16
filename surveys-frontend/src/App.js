@@ -35,7 +35,7 @@ class App extends Component {
                 <td>{survey.survey_id}</td>
                 <td>{survey.survey_title}</td>
                 <td>{survey.start_date_time}</td>
-                <td>{survey.start_date_time}</td>
+                <td>{survey.end_date_time}</td>
                 <td>
                     <button onClick={() => this.deleteSurvey(survey.survey_id)}>Delete</button>
                 </td>
