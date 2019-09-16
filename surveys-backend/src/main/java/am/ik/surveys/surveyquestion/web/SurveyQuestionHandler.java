@@ -42,7 +42,7 @@ public class SurveyQuestionHandler {
             .build();
     }
 
-    Mono<ServerResponse> deleteSurveyQuestion(ServerRequest req) {
+    private Mono<ServerResponse> deleteSurveyQuestion(ServerRequest req) {
         final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("survey_id"));
         final Question.Id questionId = Question.Id.valueOf(req.pathVariable("question_id"));
         final SurveyQuestion surveyQuestion = new SurveyQuestion.Builder()
@@ -53,7 +53,7 @@ public class SurveyQuestionHandler {
             .then(ServerResponse.noContent().build());
     }
 
-    Mono<ServerResponse> getSurveyQuestionsBySurveyId(ServerRequest req) {
+    private Mono<ServerResponse> getSurveyQuestionsBySurveyId(ServerRequest req) {
         final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("survey_id"));
         final Flux<SurveyQuestion> surveyQuestionFlux = this.surveyQuestionRepository.findBySurveyId(surveyId);
         final Flux<SurveyQuestionResponse> surveyQuestionResponseFlux = surveyQuestionFlux.flatMap(surveyQuestion -> SurveyQuestionResponse.from(surveyQuestion, this.questionRepository,
@@ -61,7 +61,7 @@ public class SurveyQuestionHandler {
         return ServerResponse.ok().body(surveyQuestionResponseFlux, SurveyQuestionResponse.class);
     }
 
-    Mono<ServerResponse> postSurveyQuestion(ServerRequest req) {
+    private Mono<ServerResponse> postSurveyQuestion(ServerRequest req) {
         final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("survey_id"));
         final Question.Id questionId = Question.Id.valueOf(req.pathVariable("question_id"));
         final Mono<Survey> surveyMono = this.surveyRepository.findById(surveyId);

@@ -25,7 +25,7 @@ public class QuestionChoiceHandler {
             .build();
     }
 
-    Mono<ServerResponse> getQuestionChoice(ServerRequest req) {
+    private Mono<ServerResponse> getQuestionChoice(ServerRequest req) {
         final QuestionChoice.Id questionChoiceId = QuestionChoice.Id.valueOf(req.pathVariable("question_choice_id"));
         final Mono<QuestionChoice> questionChoiceMono = this.questionChoiceRepository.findById(questionChoiceId);
         return questionChoiceMono
@@ -33,7 +33,7 @@ public class QuestionChoiceHandler {
             .switchIfEmpty(Mono.defer(() -> ServerResponse.notFound().build()));
     }
 
-    Mono<ServerResponse> deleteQuestionChoice(ServerRequest req) {
+    private Mono<ServerResponse> deleteQuestionChoice(ServerRequest req) {
         final QuestionChoice.Id questionChoiceId = QuestionChoice.Id.valueOf(req.pathVariable("question_choice_id"));
         final Mono<Void> questionChoiceMono = this.questionChoiceRepository.deleteById(questionChoiceId);
         return questionChoiceMono.then(ServerResponse.noContent().build());

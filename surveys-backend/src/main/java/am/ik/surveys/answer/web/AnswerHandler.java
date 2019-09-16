@@ -44,7 +44,7 @@ public class AnswerHandler {
             .build();
     }
 
-    Mono<ServerResponse> getAnswersBySurveyId(ServerRequest req) {
+    private Mono<ServerResponse> getAnswersBySurveyId(ServerRequest req) {
         final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("survey_id"));
         final Flux<Answer> answerFlux = this.answerRepository.findAllBySurveyId(surveyId);
         final Mono<Map<Answer.Id, List<AnswerDetail<?>>>> answerDetailMapMono = this.answerDetailRepository.findAllBySurveyId(surveyId)
@@ -63,7 +63,7 @@ public class AnswerHandler {
         return ServerResponse.ok().body(answerResponseFlux, AnswerResponse.class);
     }
 
-    Mono<ServerResponse> postAnswers(ServerRequest req) {
+    private Mono<ServerResponse> postAnswers(ServerRequest req) {
         final Survey.Id surveyId = Survey.Id.valueOf(req.pathVariable("survey_id"));
         final Answer.Id answerId = Answer.Id.nextValue(this.ulid);
         final Mono<AnswerResponse> answerResponseMono = req.bodyToMono(AnswerRequest.class)
@@ -77,14 +77,14 @@ public class AnswerHandler {
         return ServerResponse.created(location).body(answerResponseMono, AnswerResponse.class);
     }
 
-    Mono<ServerResponse> getAnswer(ServerRequest req) {
+    private Mono<ServerResponse> getAnswer(ServerRequest req) {
         final Answer.Id answerId = Answer.Id.valueOf(req.pathVariable("answer_id"));
         final Mono<Answer> answerMono = this.answerRepository.findById(answerId);
         final Mono<AnswerResponse> answerResponseMono = answerMono.flatMap(answer -> AnswerResponse.from(answer, answerDetailRepository));
         return ServerResponse.ok().body(answerResponseMono, AnswerResponse.class);
     }
 
-    Mono<ServerResponse> deleteAnswer(ServerRequest req) {
+    private Mono<ServerResponse> deleteAnswer(ServerRequest req) {
         final Answer.Id answerId = Answer.Id.valueOf(req.pathVariable("answer_id"));
         final Mono<Void> deleteAnswer = this.answerRepository.deleteById(answerId);
         final Flux<Void> deleteDetails = this.answerDetailRepository.findAllByAnswerId(answerId)

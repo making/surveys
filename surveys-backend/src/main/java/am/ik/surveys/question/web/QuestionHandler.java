@@ -40,7 +40,7 @@ public class QuestionHandler {
             .build();
     }
 
-    Mono<ServerResponse> postQuestions(ServerRequest req) {
+    private Mono<ServerResponse> postQuestions(ServerRequest req) {
         final Question.Id questionId = Question.Id.nextValue(this.ulid);
         final Mono<Question> questionMono = req.bodyToMono(QuestionRequest.class)
             .map(questionRequest -> questionRequest.toQuestion(questionId));
@@ -49,20 +49,20 @@ public class QuestionHandler {
         return ServerResponse.created(location).body(insert, QuestionResponse.class);
     }
 
-    Mono<ServerResponse> getQuestion(ServerRequest req) {
+    private Mono<ServerResponse> getQuestion(ServerRequest req) {
         final Question.Id questionId = Question.Id.valueOf(req.pathVariable("question_id"));
         final Mono<QuestionResponse> questionResponseMono = this.questionRepository.findById(questionId)
             .flatMap(question -> QuestionResponse.from(question, this.questionChoiceRepository));
         return ServerResponse.ok().body(questionResponseMono, QuestionResponse.class);
     }
 
-    Mono<ServerResponse> getQuestionChoices(ServerRequest req) {
+    private Mono<ServerResponse> getQuestionChoices(ServerRequest req) {
         final Question.Id questionId = Question.Id.valueOf(req.pathVariable("question_id"));
         final Flux<QuestionChoice> questionChoiceFlux = this.questionChoiceRepository.findAllByQuestionId(questionId);
         return ServerResponse.ok().body(questionChoiceFlux, QuestionChoice.class);
     }
 
-    Mono<ServerResponse> postQuestionChoices(ServerRequest req) {
+    private Mono<ServerResponse> postQuestionChoices(ServerRequest req) {
         final Question.Id questionId = Question.Id.valueOf(req.pathVariable("question_id"));
         final QuestionChoice.Id questionChoiceId = QuestionChoice.Id.nextValue(this.ulid);
         final Mono<QuestionChoice> questionChoiceMono = req.bodyToMono(QuestionChoiceRequest.class)
