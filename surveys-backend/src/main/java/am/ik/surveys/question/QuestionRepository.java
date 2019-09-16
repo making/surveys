@@ -51,6 +51,12 @@ public class QuestionRepository {
             .one();
     }
 
+    public Flux<Question> findAll() {
+        return this.databaseClient.execute(this.sqlSupplier.file("sql/question/findAllQuestion.sql"))
+            .map(this.questionRowMapper)
+            .all();
+    }
+
     public Flux<Question> findBySurveyId(Survey.Id surveyId) {
         return this.databaseClient.execute(this.sqlSupplier.file("sql/question/findAllQuestionBySurveyId.sql"))
             .bind("survey_id", surveyId.toString())

@@ -33,11 +33,18 @@ public class QuestionHandler {
 
     public RouterFunction<ServerResponse> routes() {
         return RouterFunctions.route()
+            .GET("/questions", this::getQuestions)
             .POST("/questions", this::postQuestions)
             .GET("/questions/{question_id}", this::getQuestion)
             .GET("/questions/{question_id}/question_choices", this::getQuestionChoices)
             .POST("/questions/{question_id}/question_choices", this::postQuestionChoices)
             .build();
+    }
+
+    private Mono<ServerResponse> getQuestions(ServerRequest req) {
+        final Flux<QuestionResponse> questionResponseMono = this.questionRepository.findAll()
+            .map(QuestionResponse::new);
+        return ServerResponse.ok().body(questionResponseMono, QuestionResponse.class);
     }
 
     private Mono<ServerResponse> postQuestions(ServerRequest req) {

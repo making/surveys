@@ -75,6 +75,27 @@ class QuestionHandlerTest {
     }
 
     @Test
+    void getQuestions() {
+        this.testClient.get()
+            .uri("/questions")
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(JsonNode.class)
+            .consumeWith(result -> {
+                final JsonNode res = result.getResponseBody();
+                assertThat(res).isNotNull();
+                assertThat(res).hasSize(Fixtures.questions.size());
+            })
+            .consumeWith(
+                document("get-questions",
+                    responseHeaders(headerWithName(CONTENT_TYPE).description(APPLICATION_JSON_VALUE)),
+                    responseFields(
+                        fieldWithPath("[].question_id").type(JsonFieldType.STRING).description("設問ID"),
+                        fieldWithPath("[].question_text").type(JsonFieldType.STRING).description("設問文"),
+                        fieldWithPath("[].max_choices").type(JsonFieldType.NUMBER).description("選択可能数").optional())));
+    }
+
+    @Test
     void postQuestions() {
         final Map<String, String> requestBody = Map.of("question_text", "自由回答の質問");
         this.testClient.post()

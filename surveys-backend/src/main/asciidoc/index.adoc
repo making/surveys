@@ -115,6 +115,10 @@ operation::post-selective-questions[]
 
 operation::post-question-question-choices[]
 
+==== 設問一覧取得
+
+operation::get-questions[]
+
 ==== 設問一件取得
 
 operation::get-question[]
