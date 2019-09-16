@@ -1,62 +1,31 @@
 import React, {Component} from 'react';
 import './App.css';
+import {BrowserRouter, Link, Route, Switch} from "react-router-dom";
+import {NavTab} from "react-router-tabs";
+import Surveys from "./surveys/Surveys";
+import Home from "./home/Home";
+import Survey from "./surveys/Survey";
 
 class App extends Component {
-
-    state = {
-        surveys: []
-    };
-
-    loadFromServer() {
-        fetch("/surveys")
-            .then(r => r.json())
-            .then(json => {
-                this.setState({
-                    surveys: json
-                });
-            })
-    }
-
-    componentDidMount() {
-        this.loadFromServer();
-    }
-
-    deleteSurvey(surveyId) {
-        fetch(`/surveys/${surveyId}`,
-            {
-                method: 'DELETE'
-            })
-            .then(__ => this.loadFromServer());
-    }
-
     render() {
-        const surveys = this.state.surveys.map(survey =>
-            <tr key={survey.survey_id}>
-                <td>{survey.survey_id}</td>
-                <td>{survey.survey_title}</td>
-                <td>{survey.start_date_time}</td>
-                <td>{survey.end_date_time}</td>
-                <td>
-                    <button onClick={() => this.deleteSurvey(survey.survey_id)}>Delete</button>
-                </td>
-            </tr>
-        );
         return (
-            <div>
-                <p><a href={"/docs/index.html"}>API Document</a></p>
-                <table>
-                    <tbody>
-                    <tr>
-                        <th>Survey ID</th>
-                        <th>Survey Title</th>
-                        <th>Start Date Time</th>
-                        <th>End Date Time</th>
-                        <th>Delete</th>
-                    </tr>
-                    {surveys}
-                    </tbody>
-                </table>
-            </div>
+            <BrowserRouter>
+                <div>
+                    <h1><Link to="/">アンケート</Link></h1>
+                    <section id={"main"}>
+                        <article>
+                            <NavTab exact to="/">{`Home`}</NavTab>
+                            <NavTab exact to="/_/surveys">{`Surveys`}</NavTab>
+                            <Switch>
+                                <Route exact path="/" component={Home}/>
+                                <Route exact path="/_/surveys" component={Surveys}/>
+                                <Route path="/_/surveys/:id" component={Survey}/>
+                                <Route path="/index.html" component={Surveys}/>
+                            </Switch>
+                        </article>
+                    </section>
+                </div>
+            </BrowserRouter>
         );
     }
 }

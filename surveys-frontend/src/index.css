@@ -1,13 +1,278 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+article, details > code, pre {
+  word-wrap: normal;
+  -webkit-overflow-scrolling: touch;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+.btn, a {
+  text-decoration: none
+}
+
+body {
+  font-size: 1pc;
+  margin: 2px
+}
+
+div a, div a:hover {
+  color: #2f4f4f;
+  transition: none;
+}
+
+img {
+  max-width: 100%
+}
+
+article {
+  padding: 0 5px 5px;
+  margin: 0 0 10px;
+}
+
+article p a, td a {
+  color: #647882;
+  text-decoration-line: underline;
+}
+
+hr {
+  border: 1px dashed #a9a9a9
+}
+
+footer {
+  margin: 4px
+}
+
+blockquote {
+  color: #464646;
+  font-style: italic;
+  border: 1px dotted #a9a9a9;
+  border-radius: 5px;
+  margin: 5px 0;
+  max-width: 90%
+}
+
+blockquote p {
+  margin: 10px;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+p code {
+  color: #f8f8f2;
+  background-color: #23241f;
+}
+
+p > pre > code {
+  word-wrap: normal;
+  white-space: pre;
+}
+
+details > code, pre {
+  max-width: 90%;
+  font-style: normal;
+  display: block;
+  padding: 9.5px;
+  margin: 0 0 10px;
+  font-size: 15px;
+  line-height: 1.5;
+  word-break: break-all;
+  word-wrap: break-word;
+  color: #253640;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: auto;
+}
+
+details > code {
+  word-wrap: normal;
+  white-space: pre;
+}
+
+td {
+  white-space: pre-wrap
+}
+
+
+h2 {
+  padding-left: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+h2 + ul {
+  margin-top: 10px;
+}
+
+h3 {
+  margin-top: 5px;
+}
+
+h3:before {
+  content: "☕️ "
+}
+
+h3.home {
+  width: 90%;
+  border-bottom: #eaedef solid 1px;
+  margin-bottom: 5px;
+}
+
+h3#series:before {
+  content: "📚️️ "
+}
+
+h3#presentations:before {
+  content: "🗣️️ "
+}
+
+h3#latest-entries:before {
+  content: "📣 "
+}
+
+h3 + ul {
+  margin-top: 0px;
+}
+
+h4 {
+  margin-top: 10px;
+}
+
+h4:before {
+  content: "🍃 "
+}
+
+h5 {
+  margin-top: 10px;
+}
+
+h5:before {
+  content: "✈️️ "
+}
+
+h6:before {
+  content: "☁️ "
+}
+
+
+ul {
+  padding: 0 0 0 15px;
+}
+
+ul.entries {
+  padding: 0 0 0 15px
+}
+
+ul.links {
+  padding: 0 0 0 20px
+}
+
+ul.series {
+  padding: 0 0 0 0px;
+}
+
+ul.categories > li, ul.tags > li, ul.series > li {
+  list-style: none;
+}
+
+ul.categories, ul.tags {
+  padding: 0
+}
+
+ul.series > li:before {
+  content: "📌 ";
+}
+
+img.emoji {
+  width: 1pc
+}
+
+.invisible-block-on-wide, .invisible-inline-on-wide {
+  display: inline
+}
+
+.visible-block-on-wide, .visible-inline-on-wide {
+  display: none
+}
+
+.caution, .danger, .quite-danger, .warning {
+  padding: 5px;
+  border-radius: 5px
+}
+
+.caution {
+  background-color: gold
+}
+
+.warning {
+  background-color: #f08080
+}
+
+.danger {
+  background-color: #9370db
+}
+
+.quite-danger {
+  background-color: #639;
+  color: #fff
+}
+
+.opacity-10 {
+  opacity: .1
+}
+
+.opacity-3 {
+  opacity: .03
+}
+
+.btn {
+  position: relative;
+  display: inline-block;
+  padding: .25em .5em;
+  color: #464646;
+  background: #f0f8ff;
+  border: 1px solid #a9a9a9;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 0 hsla(0, 0%, 100%, .2)
+}
+
+.btn:active {
+  border: 1px solid #666;
+  box-shadow: none
+}
+
+@media (min-width: 700px) {
+  ul {
+    padding: 0 0 0 25px;
+  }
+
+  body {
+    margin: 20px
+  }
+
+  article {
+    padding: 0 10px 10px
+  }
+
+  img, pre {
+    max-width: 90%
+  }
+
+  ul.entries {
+    padding: 0
+  }
+
+  ul.entries > li {
+    list-style: none
+  }
+
+  .invisible-block-on-wide, .invisible-inline-on-wide {
+    display: none
+  }
+
+  .visible-inline-on-wide {
+    display: inline
+  }
+
+  .visible-block-on-wide {
+    display: block
+  }
 }

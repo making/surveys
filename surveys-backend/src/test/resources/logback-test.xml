@@ -2,7 +2,7 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
     <!--    <logger name="io.r2dbc.h2.client.SessionClient" level="DEBUG"/>-->
-    <!--    <logger name="org.springframework.data.r2dbc.core.DefaultDatabaseClient" level="DEBUG"/>-->
+    <logger name="org.springframework.data.r2dbc.core.DefaultDatabaseClient" level="DEBUG"/>
     <!--    <logger name="org.springframework.data.r2dbc.connectionfactory.init.ScriptUtils" level="DEBUG"/>-->
     <logger name="org.springframework.web.reactive.function.client.ExchangeFunctions" level="TRACE"/>
     <logger name="org.springframework.web.HttpLogging" level="TRACE"/>
