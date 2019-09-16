@@ -2,11 +2,14 @@ package am.ik.surveys.question;
 
 import am.ik.surveys.infra.sql.SqlSupplier;
 import am.ik.surveys.survey.Survey;
+import io.r2dbc.spi.Row;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.function.Function;
 
 @Repository
 public class QuestionRepository {
@@ -17,28 +20,32 @@ public class QuestionRepository {
 
     private final SqlSupplier sqlSupplier;
 
+    private final Function<Row, Question> questionRowMapper = row -> new Question.Builder()
+        .withQuestionId(Question.Id.valueOf(row.get("question_id", String.class)))
+        .withQuestionText(row.get("question_text", String.class))
+        .build();
+
+    @SuppressWarnings("ConstantConditions")
+    private final Function<Row, SelectiveQuestion> selectiveQuestionRowMapper = row -> new SelectiveQuestion.Builder()
+        .withQuestionId(Question.Id.valueOf(row.get("question_id", String.class)))
+        .withQuestionText(row.get("question_text", String.class))
+        .withMaxChoices(row.get("max_choices", Integer.class))
+        .build();
+
     public QuestionRepository(DatabaseClient databaseClient, TransactionalOperator transactionalOperator, SqlSupplier sqlSupplier) {
         this.databaseClient = databaseClient;
         this.transactionalOperator = transactionalOperator;
         this.sqlSupplier = sqlSupplier;
     }
 
-    @SuppressWarnings("ConstantConditions")
     public Mono<Question> findById(Question.Id questionId) {
         final Mono<Question> question = this.databaseClient.execute(this.sqlSupplier.file("sql/question/findQuestionById.sql"))
             .bind("question_id", questionId.toString())
-            .map(row -> new Question.Builder()
-                .withQuestionId(Question.Id.valueOf(row.get("question_id", String.class)))
-                .withQuestionText(row.get("question_text", String.class))
-                .build())
+            .map(this.questionRowMapper)
             .one();
         final Mono<Question> selectiveQuestion = this.databaseClient.execute(this.sqlSupplier.file("sql/question/findSelectiveQuestionById.sql"))
             .bind("question_id", questionId.toString())
-            .map(row -> new SelectiveQuestion.Builder()
-                .withQuestionId(Question.Id.valueOf(row.get("question_id", String.class)))
-                .withQuestionText(row.get("question_text", String.class))
-                .withMaxChoices(row.get("max_choices", Integer.class))
-                .build())
+            .map(this.selectiveQuestionRowMapper)
             .one()
             .cast(Question.class);
         return selectiveQuestion.switchIfEmpty(question);
@@ -47,18 +54,11 @@ public class QuestionRepository {
     public Flux<Question> findBySurveyId(Survey.Id surveyId) {
         final Flux<Question> question = this.databaseClient.execute(this.sqlSupplier.file("sql/question/findAllQuestionBySurveyId.sql"))
             .bind("survey_id", surveyId.toString())
-            .map(row -> new Question.Builder()
-                .withQuestionId(Question.Id.valueOf(row.get("question_id", String.class)))
-                .withQuestionText(row.get("question_text", String.class))
-                .build())
+            .map(this.questionRowMapper)
             .all();
         final Flux<Question> selectiveQuestion = this.databaseClient.execute(this.sqlSupplier.file("sql/question/findAllSelectiveQuestionBySurveyId.sql"))
             .bind("survey_id", surveyId.toString())
-            .map(row -> new SelectiveQuestion.Builder()
-                .withQuestionId(Question.Id.valueOf(row.get("question_id", String.class)))
-                .withQuestionText(row.get("question_text", String.class))
-                .withMaxChoices(row.get("max_choices", Integer.class))
-                .build())
+            .map(this.selectiveQuestionRowMapper)
             .all()
             .cast(Question.class);
         return selectiveQuestion.concatWith(question);
