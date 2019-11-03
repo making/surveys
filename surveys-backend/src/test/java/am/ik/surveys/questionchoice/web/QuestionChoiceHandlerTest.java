@@ -1,25 +1,5 @@
 package am.ik.surveys.questionchoice.web;
 
-import am.ik.surveys.Fixtures;
-import am.ik.surveys.TestUtils;
-import am.ik.surveys.infra.sql.SqlSupplier;
-import am.ik.surveys.question.QuestionRepository;
-import am.ik.surveys.questionchoice.QuestionChoice;
-import am.ik.surveys.questionchoice.QuestionChoiceRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import io.r2dbc.spi.ConnectionFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.data.r2dbc.core.DatabaseClient;
-import org.springframework.restdocs.RestDocumentationContextProvider;
-import org.springframework.restdocs.RestDocumentationExtension;
-import org.springframework.restdocs.payload.JsonFieldType;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.transaction.reactive.TransactionalOperator;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
 import static com.epages.restdocs.apispec.WebTestClientRestDocumentationWrapper.document;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -30,6 +10,29 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.data.r2dbc.core.DatabaseClient;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.transaction.reactive.TransactionalOperator;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import am.ik.surveys.Fixtures;
+import am.ik.surveys.TestUtils;
+import am.ik.surveys.answer.AnswerDetailRepository;
+import am.ik.surveys.infra.sql.SqlSupplier;
+import am.ik.surveys.question.QuestionRepository;
+import am.ik.surveys.questionchoice.QuestionChoice;
+import am.ik.surveys.questionchoice.QuestionChoiceRepository;
+import io.r2dbc.spi.ConnectionFactory;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 @ExtendWith({RestDocumentationExtension.class})
 class QuestionChoiceHandlerTest {
@@ -46,7 +49,8 @@ class QuestionChoiceHandlerTest {
         final SqlSupplier sqlSupplier = TestUtils.sqlSupplier();
         this.questionChoiceRepository = new QuestionChoiceRepository(databaseClient, transactionalOperator, sqlSupplier);
         final QuestionRepository questionRepository = new QuestionRepository(databaseClient, transactionalOperator, sqlSupplier);
-        final QuestionChoiceHandler questionChoiceHandler = new QuestionChoiceHandler(questionChoiceRepository);
+        final AnswerDetailRepository answerDetailRepository = new AnswerDetailRepository(databaseClient, transactionalOperator, sqlSupplier);
+        final QuestionChoiceHandler questionChoiceHandler = new QuestionChoiceHandler(questionChoiceRepository, answerDetailRepository, transactionalOperator);
         this.testClient = TestUtils.webTestClient(questionChoiceHandler.routes(), restDocumentation)
             .build();
 
