@@ -19,8 +19,8 @@ public class SecurityConfig {
 				.authorizeExchange(authorization -> authorization //
 						.pathMatchers(HttpMethod.OPTIONS, "/**").permitAll() //
 						.pathMatchers(HttpMethod.GET, "/surveys/*", "/questions/*", "/questions/*/question_choices",
-								"/question_choices", "/docs/**", "/webjars/**", "actuator/health", "actuator/info",
-								"actuator/prometheus")
+								"/question_choices", "/docs/**", "/webjars/**", "/actuator/health", "/actuator/info",
+								"/actuator/prometheus", "/static/**", "/favicon.ico", "/manifest.json")
 						.permitAll() //
 						.pathMatchers(HttpMethod.POST, "/surveys/*/answers").permitAll() //
 						.pathMatchers("/", "/index.html", "/_/**", "actuator/**").hasRole("ADMIN") //
