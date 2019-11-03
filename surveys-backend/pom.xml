@@ -17,7 +17,7 @@
         <restdocs-api-spec.version>0.9.4</restdocs-api-spec.version>
         <restdocs-spec.version>0.15</restdocs-spec.version>
         <restdoc.scheme>https</restdoc.scheme>
-        <restdoc.host>surveys.cfapps.io</restdoc.host>
+        <restdoc.host>surveys.ik.am</restdoc.host>
         <restdoc.port>443</restdoc.port>
         <docs.resources.version>0.1.2.RELEASE</docs.resources.version>
     </properties>

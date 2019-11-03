@@ -70,7 +70,7 @@ public class TestUtils {
                 .operationPreprocessors()
                 .withRequestDefaults(modifyUris()
                         .scheme("https")
-                        .host("surveys.cfapps.io")
+                        .host("surveys.ik.am")
                         .removePort()
                     , prettyPrint())
                 .withResponseDefaults(prettyPrint())
