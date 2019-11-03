@@ -1,0 +1,21 @@
+apiVersion: gateway.cloud.ik.am/v1beta1
+kind: RouteDefinition
+metadata:
+  name: surveys
+  namespace: surveys
+spec:
+  serviceName: surveys
+  route:
+    predicates:
+    - Host=surveys.ik.am
+    filters:
+    - RequestLogging=
+    - PreserveHostHeader
+    - SetResponseHeader=Access-Control-Allow-Origin, *
+    - SetResponseHeader=Access-Control-Allow-Methods, GET, OPTIONS
+    - SetResponseHeader=Access-Control-Max-Age, 3600
+    - SetResponseHeader=Access-Control-Allow-Headers, *
+    - name: Retry
+      args:
+        retries: "3"
+        statuses: BAD_GATEWAY

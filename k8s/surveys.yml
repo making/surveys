@@ -1,0 +1,121 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: surveys
+  namespace: surveys
+  labels:
+    app: surveys
+spec:
+  selector:
+    app: surveys
+  ports:
+  - protocol: TCP
+    port: 8080
+    name: http
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: surveys
+  namespace: surveys
+  labels:
+    app: surveys
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: surveys
+  template:
+    metadata:
+      labels:
+        app: surveys
+    spec:
+      containers:
+      - name: surveys
+        image: making/surveys:0.1.0-SNAPSHOT
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: kubernetes
+        - name: JAVA_OPTS
+          value: " -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo -Duser.language=ja -Duser.country=JP"
+        - name: BPL_THREAD_COUNT
+          value: "24"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: surveys-secret
+              key: postgres-password
+        - name: SPRING_SECURITY_USER_NAME
+          valueFrom:
+            secretKeyRef:
+              name: surveys-secret
+              key: admin-username
+        - name: SPRING_SECURITY_USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: surveys-secret
+              key: admin-password
+        - name: DATABASE_URL
+          value: "postgresql://survey:${POSTGRES_PASSWORD}@10.0.8.4:5432/survey"
+        - name: USER
+          value: survey
+        - name: SPRING_ZIPKIN_SERVICE_NAME
+          value: "${INFO_K8S_NAMESPACE}:surveys"
+        - name: SPRING_ZIPKIN_BASE_URL
+          value: http://10.0.8.4:9411
+        - name: LOGGING_EXCEPTION_CONVERSION_WORD
+          value: "\t%replace(%replace(%xEx){'\n','@n@'}){'\t','    '}%nopex"
+        - name: LOGGING_PATTERN_CONSOLE
+          value: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${logging.pattern.level:%5p}) %clr(${PID: }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %replace(%m){'\n','@n@'}${logging.exception-conversion-word:%wEx}%n"
+        - name: SPRING_SLEUTH_SAMPLER_RATE
+          value: "30"
+        - name: INFO_K8S_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: INFO_K8S_POD
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: INFO_K8S_APP
+          value: "${spring.application.name}"
+        - name: MANAGEMENT_METRICS_TAGS_NAMESPACE
+          value: "${INFO_K8S_NAMESPACE}"
+        - name: MANAGEMENT_METRICS_TAGS_POD
+          value: "${INFO_K8S_POD}"
+        - name: MANAGEMENT_METRICS_TAGS_APP
+          value: "${INFO_K8S_APP}"
+        resources:
+          limits:
+            memory: "256Mi"
+          requests:
+            memory: "256Mi"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 10
+          timeoutSeconds: 3
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /actuator/info
+            port: 8080
+          initialDelaySeconds: 60
+          timeoutSeconds: 3
+          periodSeconds: 10
+          failureThreshold: 3
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: "app"
+                operator: In
+                values:
+                - surveys
+            topologyKey: "kubernetes.io/hostname"
