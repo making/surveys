@@ -1,10 +1,13 @@
 package am.ik.surveys.questionchoice.web;
 
+import static am.ik.surveys.TestUtils.basicAdmin;
 import static com.epages.restdocs.apispec.WebTestClientRestDocumentationWrapper.document;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -69,6 +72,7 @@ class QuestionChoiceHandlerTest {
         final QuestionChoice questionChoice = Fixtures.questionChoices.get(0);
         this.testClient.get()
             .uri("/question_choices/{question_choice_id}", questionChoice.getQuestionChoiceId())
+            .headers(basicAdmin())
             .exchange()
             .expectStatus().isOk()
             .expectBody(JsonNode.class)
@@ -82,6 +86,7 @@ class QuestionChoiceHandlerTest {
             })
             .consumeWith(
                 document("get-question-choice",
+                    requestHeaders(headerWithName(AUTHORIZATION).description("Basic認証")),
                     pathParameters(parameterWithName("question_choice_id").description("設問選択肢ID")),
                     responseHeaders(headerWithName(CONTENT_TYPE).description(APPLICATION_JSON_VALUE)),
                     responseFields(
@@ -96,11 +101,13 @@ class QuestionChoiceHandlerTest {
         final QuestionChoice questionChoice = Fixtures.questionChoices.get(0);
         this.testClient.delete()
             .uri("/question_choices/{question_choice_id}", questionChoice.getQuestionChoiceId())
+            .headers(basicAdmin())
             .exchange()
             .expectStatus().isNoContent()
             .expectBody(JsonNode.class)
             .consumeWith(
                 document("delete-question-choice",
+                    requestHeaders(headerWithName(AUTHORIZATION).description("Basic認証")),
                     pathParameters(parameterWithName("question_choice_id").description("設問選択肢ID"))));
 
         final Mono<QuestionChoice> questionChoiceMono = this.questionChoiceRepository.findById(questionChoice.getQuestionChoiceId());
