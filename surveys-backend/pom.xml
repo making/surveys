@@ -19,7 +19,7 @@
         <restdoc.scheme>https</restdoc.scheme>
         <restdoc.host>surveys.ik.am</restdoc.host>
         <restdoc.port>443</restdoc.port>
-        <docs.resources.version>0.1.2.RELEASE</docs.resources.version>
+        <docs.resources.version>0.1.3.RELEASE</docs.resources.version>
     </properties>
 
     <dependencies>
