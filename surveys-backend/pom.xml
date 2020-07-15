@@ -14,7 +14,7 @@
     <properties>
         <java.version>11</java.version>
         <asciidoctor.version>1.5.6</asciidoctor.version>
-        <restdocs-api-spec.version>0.9.4</restdocs-api-spec.version>
+        <restdocs-api-spec.version>0.9.11</restdocs-api-spec.version>
         <restdocs-spec.version>0.15</restdocs-spec.version>
         <restdoc.scheme>https</restdoc.scheme>
         <restdoc.host>surveys.ik.am</restdoc.host>
