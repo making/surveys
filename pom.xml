@@ -15,7 +15,7 @@
     <name>surveys</name>
     <description>Blank multi project for Spring Boot + Elm</description>
     <properties>
-        <spring-cloud.version>Hoxton.RC1</spring-cloud.version>
+        <spring-cloud.version>Hoxton.SR7</spring-cloud.version>
     </properties>
 
     <dependencyManagement>
