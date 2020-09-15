@@ -13,7 +13,7 @@
 
     <properties>
         <java.version>11</java.version>
-        <asciidoctor.version>1.5.6</asciidoctor.version>
+        <asciidoctor.version>2.1.0</asciidoctor.version>
         <restdocs-api-spec.version>0.9.4</restdocs-api-spec.version>
         <restdocs-spec.version>0.15</restdocs-spec.version>
         <restdoc.scheme>https</restdoc.scheme>
